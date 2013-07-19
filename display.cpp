@@ -26,7 +26,7 @@ display::~display () {
     SDL_Quit ();
 }
 
-int display::copy_tile_to_display (string tile, coords* pos) {
+int display::copy_tile_to_display (string tile, coords* c_pos) {
     SDL_Rect src, dest;
     src.x = 0;
     src.y = 0;
@@ -34,8 +34,8 @@ int display::copy_tile_to_display (string tile, coords* pos) {
     src.h = TILE_SIZE;
     dest.w = TILE_SIZE;
     dest.h = TILE_SIZE;
-    dest.x = pos -> x;
-    dest.y = pos -> y;
+    dest.x = c_pos -> x;
+    dest.y = c_pos -> y;
     if (!(this -> tmm.contains_tile (tile)))
         this -> import_tile_texture (tile);
     SDL_Texture* texture = this -> tmm.get_tile_texture (tile);
@@ -54,20 +54,32 @@ void display::import_tile_texture (string file) {
     SDL_FreeSurface (surface);
 }
 
-void display::render_screen (string prefix, int32_t** tiles, coords* pos) {
-    coords pos_draw;
+void display::render_screen (string prefix, int32_t** tiles, coords* c_pos) {
+    coords c_draw_pos;
     int i, j, i_start, j_start;
-    for (i = 0, pos_draw.y = 0; pos_draw.y < this -> height; i++, pos_draw.y += TILE_SIZE) {
-        for (j = 0, pos_draw.x = 0; pos_draw.x < this -> width; j++, pos_draw.x += TILE_SIZE) {
+    
+    SDL_RenderClear (renderer);
+    
+    // Assume Claw at center of screen
+    int top = c_pos -> y - this -> height / 2;
+    int left = c_pos -> x - this -> width / 2;
+    i_start = top / TILE_SIZE;
+    j_start = left / TILE_SIZE;
+    //~ cout << i_start << endl;
+    //~ cout << j_start << endl;
+    for (i = i_start, c_draw_pos.y = i_start * TILE_SIZE - top; c_draw_pos.y < this -> height; i++, c_draw_pos.y += TILE_SIZE) {
+        for (j = j_start, c_draw_pos.x = j_start * TILE_SIZE - left; c_draw_pos.x < this -> width; j++, c_draw_pos.x += TILE_SIZE) {
             int tileID = tiles [i][j];
+            //~ cout << tileID << endl;
             if (tileID >= 0) {
                 string tile = prefix + convert_to_three_digits (tileID) + TEXTURE_FILE_TYPE;
-                this -> copy_tile_to_display (tile, &pos_draw);
+                if (!f_exists (tile))
+                    tile = prefix + convert_int_to_string (tileID) + TEXTURE_FILE_TYPE;
+                this -> copy_tile_to_display (tile, &c_draw_pos);
             }
         }
     }
     SDL_RenderPresent(this -> renderer);
-    SDL_Delay(1000);
 }
 
 SDL_Texture* tile_memory_manager::get_tile_texture (string tile) {

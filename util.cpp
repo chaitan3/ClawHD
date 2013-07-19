@@ -1,6 +1,7 @@
 
 #include "util.h"
 #include <sstream>
+#include <sys/stat.h>
 
 int f_read_integer (ifstream *file, int offset) {
     uint32_t val;
@@ -21,6 +22,17 @@ string convert_to_three_digits (int number) {
         stream << "00" << number;
     }   
     return stream.str ();
+}
+
+string convert_int_to_string (int number) {
+    stringstream stream;
+    stream << number;
+    return stream.str ();
+}
+
+bool f_exists (string name) {
+  struct stat buffer;   
+  return stat (name.c_str(), &buffer) == 0; 
 }
 
 coords::coords () {

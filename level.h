@@ -16,9 +16,12 @@ class plane {
 };
 
 class level {
+    coords c_start_loc;
+    
     public:
     plane p_action, p_bg, p_fg;
     level (string);
+    coords* get_start_location ();
 };
 
 

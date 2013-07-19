@@ -3,19 +3,25 @@
 #include <cstring>
 
 level::level (string filename) {
-    int inflated_len = 1000000;
-    char inflated_data [inflated_len];
-    //~ int offset = 0x5F4;
-    int offset = 0;
     ifstream f_wwd (filename.c_str());
     
+    // Get start position
+    this -> c_start_loc.x = f_read_integer (&f_wwd, 0x2D0);
+    this -> c_start_loc.y = f_read_integer (&f_wwd, 0x2D4);
+    
     // Get length of the compressed data
+    f_wwd.close ();
+    f_wwd.open ("l1");
+    //~ int offset = 0x5F4;
+    int offset = 0;
     f_wwd.seekg (0, ios::end);
     int end = f_wwd.tellg ();
     int deflated_len = end - offset;
     f_wwd.seekg (offset, ios::beg);
     
     // Extract data using zlib
+    int inflated_len = 1000000;
+    char inflated_data [inflated_len];
     char deflated_data [deflated_len];
     f_wwd.read (deflated_data, deflated_len);
     int ret = uncompress ((Bytef*) inflated_data, (uLong*) &inflated_len,
@@ -35,6 +41,10 @@ level::level (string filename) {
     p_fg.import_tile_ids (ptr_data);
     
     f_wwd.close ();
+}
+
+coords* level::get_start_location () {
+    return &(this -> c_start_loc);
 }
 
 char* plane::import_tile_ids (char *ptr) {
