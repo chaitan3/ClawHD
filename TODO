@@ -1,0 +1,13 @@
+Bugs:
+    Read original WWD file, fix the zlib extraction
+    Read PID files directly
+    Bounds checking for movement
+Non-static object drawing
+Animations
+Physics
+Menu
+
+Valgrind Memory checks
+LICENSE, README files
+More documentation
+Macros for offsets
