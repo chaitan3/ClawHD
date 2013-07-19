@@ -39,8 +39,15 @@ level::level (string filename) {
 
 char* plane::import_tile_ids (char *ptr) {
     int area = this -> height * this -> width;
-    tiles = (int **) new int [area];
-    memcpy (this -> tiles, ptr, area);
+    this -> tiles = new int32_t* [this -> height];
+    for (int i = 0; i < this -> height; i++)
+        this -> tiles [i] = new int32_t [this -> width];
+        
+    for (int i = 0; i < this -> height; i++) {
+        for (int j = 0; j < this -> width; j++) {
+            memcpy (&(this -> tiles [i][j]), ptr + (i * this -> width + j) * 4, 4);
+        }
+    }
     return ptr + this -> height * this -> width * 4;
 }
 
@@ -48,4 +55,15 @@ char* plane::set_width_and_height (char *ptr) {
     memcpy (&this->height, ptr + 4, 4);
     memcpy (&this->width, ptr, 4);
     return ptr + 0xA0;
+}
+
+int plane::get_width () {
+    return this -> width;
+}
+int plane::get_height () {
+    return this -> height;
+}
+
+int32_t** plane::get_tile_ids () {
+    return this -> tiles;
 }

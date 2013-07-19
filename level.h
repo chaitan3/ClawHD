@@ -5,11 +5,11 @@
 class plane {
     int height;
     int width;
-    int **tiles;
+    int32_t **tiles;
     
     public:
     char* import_tile_ids (char *);
-    int** get_tile_ids ();
+    int32_t** get_tile_ids ();
     char* set_width_and_height (char*);
     int get_width ();
     int get_height ();

@@ -1,7 +1,7 @@
 CC = g++
 TARGET = test
 FLAGS = -Wall -g
-LIBS = -lz -lSDL2
+LIBS = -lz -lSDL2 -lSDL2_image
 OBJ = test.o util.o level.o display.o
 all: $(TARGET)
 %.o: %.cpp

@@ -29,9 +29,19 @@ int main (int argc, char **argv)
 {   
     display disp;
     level l1 ("l1");
-    string file = "../Images/LEVEL1/TILES/BACK/0.43.png";
-    disp.import_tile_texture (file);
-    disp.copy_tile_to_display (file);
+    coords state;
+    
+    state.x = 10;
+    state.y = 10;
+    
+    cout << l1.p_bg.get_height() << " " << l1.p_bg.get_width() << endl;
+    cout << l1.p_action.get_height() << " " << l1.p_action.get_width() << endl;
+    cout << l1.p_fg.get_height() << " " << l1.p_fg.get_width() << endl;
+    
+    string prefix = "../Images/LEVEL1/TILES/BACK/";
+    disp.render_screen (prefix, l1.p_bg.get_tile_ids (), &state);
+    string prefix = "../Images/LEVEL1/TILES/ACTION/";
+    disp.render_screen (prefix, l1.p_action.get_tile_ids (), &state);
     return 0;
 }
 
