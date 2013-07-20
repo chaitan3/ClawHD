@@ -4,9 +4,9 @@
 #include "util.hpp"
 #include "level.hpp"
 #include "kdtree.hpp"
-#include <map>
 
 #define TILE_SIZE 64
+#define RENDERER_PADDING 50
 #define TEXTURE_FILE_TYPE string(".png")
 
 class tile_memory_manager {

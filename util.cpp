@@ -12,6 +12,13 @@ int f_read_integer (ifstream *file, int offset) {
     return val;
 }
 
+int f_read_short_int (ifstream *file, int offset) {
+    uint16_t val;
+    file -> seekg (offset, ios::beg);
+    file -> read ((char *) &val, sizeof (val));
+    return val;
+}
+
 string f_read_path (ifstream *file, int offset, int length) {
     char* buffer = new char [length];
     file -> seekg (offset, ios::beg);

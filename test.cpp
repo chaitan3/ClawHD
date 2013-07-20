@@ -22,6 +22,7 @@
  */
 
 #include "level.hpp"
+#include "animate.hpp"
 #include "kdtree.hpp"
 #include "util.hpp"
 #include "display.hpp"
@@ -31,12 +32,9 @@ int main (int argc, char **argv)
 {   
     display disp;
     level l1 ("l1_orig");
+    animation anim ("../Extracted/CLAW/ANIS/STAND.ANI");
     coords* start_state = l1.get_start_location ();
     coords state (start_state -> x, start_state -> y);
-    
-    //~ cout << l1.p_bg.get_height() << " " << l1.p_bg.get_width() << endl;
-    //~ cout << l1.p_action.get_height() << " " << l1.p_action.get_width() << endl;
-    //~ cout << l1.p_fg.get_height() << " " << l1.p_fg.get_width() << endl;
     
     disp.render_screen (&l1, &state);
     

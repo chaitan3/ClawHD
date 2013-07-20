@@ -69,48 +69,48 @@ void display::import_tile_texture (string file) {
 }
 
 void display::render_screen (level* l_current, coords* c_pos) {
-    plane* static_plane = l_current -> get_action_plane ();
     kdtree <dynamic_tile>* dynamic_tiles = l_current -> get_dynamic_tiles ();
-    int32_t **tiles = static_plane -> get_tile_ids ();
     
     coords c_draw_pos;
     int i, j, i_start, j_start;
+    int top = c_pos -> y - this -> height / 2;
+    int left = c_pos -> x - this -> width / 2;
     
     SDL_RenderClear (renderer);
     
     // Assume Claw at center of screen
     // Render static tiles
-    int top = c_pos -> y - this -> height / 2;
-    int left = c_pos -> x - this -> width / 2;
-    i_start = top / TILE_SIZE;
-    j_start = left / TILE_SIZE;
-    //~ cout << i_start << endl;
-    //~ cout << j_start << endl;
-    for (i = i_start, c_draw_pos.y = i_start * TILE_SIZE - top + TILE_SIZE / 2; c_draw_pos.y < this -> height; i++, c_draw_pos.y += TILE_SIZE) {
-        for (j = j_start, c_draw_pos.x = j_start * TILE_SIZE - left + TILE_SIZE / 2; c_draw_pos.x < this -> width; j++, c_draw_pos.x += TILE_SIZE) {
-            int tileID = tiles [i][j];
-            //~ cout << tileID << endl;
-            if (tileID >= 0) {
-                string tile = static_plane -> folder_prefix +
-                convert_to_three_digits (tileID) + TEXTURE_FILE_TYPE;
-                if (!f_exists (tile))
-                    tile = static_plane -> folder_prefix + 
-                    convert_int_to_string (tileID) + TEXTURE_FILE_TYPE;
-                this -> copy_tile_to_display (tile, &c_draw_pos);
+    for (int k = 0; k < l_current -> get_num_planes (); k++) {
+        plane* p_curr = l_current -> get_plane (k);
+        int32_t **tiles = p_curr -> get_tile_ids ();
+        int num_w_tiles =  p_curr -> get_width ();
+        int num_h_tiles =  p_curr -> get_height ();
+        i_start = top / TILE_SIZE;
+        j_start = left / TILE_SIZE;
+        for (i = i_start, c_draw_pos.y = i_start * TILE_SIZE - top + TILE_SIZE / 2; c_draw_pos.y < this -> height + TILE_SIZE / 2; i++, c_draw_pos.y += TILE_SIZE) {
+            for (j = j_start, c_draw_pos.x = j_start * TILE_SIZE - left + TILE_SIZE / 2; c_draw_pos.x < this -> width + TILE_SIZE / 2; j++, c_draw_pos.x += TILE_SIZE) {
+                
+                int tileID = tiles [i % num_h_tiles][j % num_w_tiles];
+                if (tileID >= 0) {
+                    string tile = p_curr -> folder_prefix +
+                    convert_to_three_digits (tileID) + TEXTURE_FILE_TYPE;
+                    if (!f_exists (tile))
+                        tile = p_curr -> folder_prefix + 
+                        convert_int_to_string (tileID) + TEXTURE_FILE_TYPE;
+                    this -> copy_tile_to_display (tile, &c_draw_pos);
+                }
             }
         }
     }
-    
     // Render Dynamic Tiles
-    coords c_top_left (left, top), c_bottom_right (left + this -> width, top + this -> height);
+    coords c_top_left (left - RENDERER_PADDING, top - RENDERER_PADDING);
+    coords c_bottom_right (left + this -> width + RENDERER_PADDING, top + this -> height + RENDERER_PADDING);
     list <dynamic_tile>* interior_elements = dynamic_tiles -> range_search (&c_top_left, &c_bottom_right);
     
     list <dynamic_tile>::iterator it;
     for (it = interior_elements -> begin (); it != interior_elements -> end (); it++) {
         coords* c_tile_pos = it -> get_coords ();
         string tile = l_current -> get_image_file (it -> get_image (), 0);
-        cout << tile << endl;
-        
         c_draw_pos.x = c_tile_pos -> x - left;
         c_draw_pos.y = c_tile_pos -> y - top;
         this -> copy_tile_to_display (tile, &c_draw_pos);

@@ -3,8 +3,12 @@
 #include "miniz.h"
 #include <cstring>
 
+
 level::level (string filename) {
     ifstream f_wwd (filename.c_str(), ios::in | ios::binary);
+    
+    this -> num_planes = f_read_integer (&f_wwd, 0x8);
+    this -> planes.reserve (num_planes);
     
     // Get tiles folder
     this -> folder_tiles = f_read_path (&f_wwd, 0x1D0, 0x80);
@@ -38,21 +42,39 @@ level::level (string filename) {
     char *ptr_end = inflated_data + inflated_len;
     
     // Get resolution of the 3 planes
-    char *ptr_data = inflated_data + 0x60;
-    ptr_data = this -> p_bg.set_width_and_height (ptr_data);
-    ptr_data = this -> p_action.set_width_and_height (ptr_data);
-    this -> p_fg.set_width_and_height (ptr_data);
-    
+    char *ptr_data = inflated_data;
+    int width, height, tile_width, tile_height, x_move_speed, y_move_speed;
+    for (int i = 0; i < this -> num_planes; i++) {
+        ptr_data += 0x58;
+        memcpy (&tile_width, ptr_data, 4);
+        ptr_data += 0x4;
+        memcpy (&tile_height, ptr_data, 4);
+        ptr_data += 0x4;
+        memcpy (&width, ptr_data, 4);
+        ptr_data += 0x4;
+        memcpy (&height, ptr_data, 4);
+        ptr_data += 0x0c;
+        memcpy (&x_move_speed, ptr_data, 4);
+        ptr_data += 0x04;
+        memcpy (&y_move_speed, ptr_data, 4);
+        ptr_data += 0x2c;
+        
+        plane* p = new plane (tile_width, tile_height, width, height, x_move_speed, y_move_speed);
+        this -> planes.push_back (p);
+    }
     // Copy tile IDs for each plane
-    ptr_data = inflated_data + 0x1E0;
-    ptr_data = this -> p_bg.import_tile_ids (ptr_data);
-    ptr_data = this -> p_action.import_tile_ids (ptr_data);
-    ptr_data = this -> p_fg.import_tile_ids (ptr_data);
+    for (int i = 0; i < this -> num_planes; i++) {
+        ptr_data = this -> planes [i] -> import_tile_ids (ptr_data);
+    }
     
     // Set folder names for each of the planes
-    this -> p_bg.folder_prefix = DATA_PREFIX + this -> folder_tiles + string ("/BACK/");
-    this -> p_action.folder_prefix = DATA_PREFIX + this -> folder_tiles + string ("/ACTION/");
-    this -> p_fg.folder_prefix = DATA_PREFIX + this -> folder_tiles + string ("/FRONT/");
+    action_plane = planes [1];
+    this -> planes [0] -> folder_prefix = DATA_PREFIX + this -> folder_tiles + string ("/BACK/");
+    this -> planes [0] -> x_wrapping = true;
+    this -> planes [0] -> y_wrapping = true;
+    this -> planes [1] -> folder_prefix = DATA_PREFIX + this -> folder_tiles + string ("/ACTION/");
+    this -> planes [2] -> folder_prefix = DATA_PREFIX + this -> folder_tiles + string ("/FRONT/");
+    this -> planes [0] -> x_wrapping = true;
     
     // Start dynamic tiles
     ptr_data += 0x1A;
@@ -69,7 +91,6 @@ level::level (string filename) {
         memcpy (&(c_pos.x), ptr_data + 12, 4);
         memcpy (&(c_pos.y), ptr_data + 16, 4);
         memcpy (&time, ptr_data + 20, 4);
-        //~ cout << ptr_data - inflated_data << endl;
         
         // copy info data
         ptr_data += 0x114;
@@ -106,6 +127,7 @@ level::level (string filename) {
             
         this -> d_tiles.insert (d_tile);
     }
+    
 }
 
 char* level::get_compressed_data (ifstream* file, int offset, int inflated_len) {
@@ -126,12 +148,20 @@ char* level::get_compressed_data (ifstream* file, int offset, int inflated_len) 
     
 }
 
+int level::get_num_planes () {
+    return this -> num_planes;
+}
+
 coords* level::get_start_location () {
     return &(this -> c_start_loc);
 }
 
 plane* level::get_action_plane () {
-    return &(this -> p_action);
+    return this -> action_plane;
+}
+
+plane* level::get_plane (int i) {
+    return this -> planes [i];
 }
 
 kdtree <dynamic_tile>* level::get_dynamic_tiles () {
@@ -155,12 +185,6 @@ char* plane::import_tile_ids (char *ptr) {
     return ptr + this -> height * this -> width * 4;
 }
 
-char* plane::set_width_and_height (char *ptr) {
-    memcpy (&this -> height, ptr + 4, 4);
-    memcpy (&this -> width, ptr, 4);
-    return ptr + 0xA0;
-}
-
 int plane::get_width () {
     return this -> width;
 }
@@ -170,6 +194,17 @@ int plane::get_height () {
 
 int32_t** plane::get_tile_ids () {
     return this -> tiles;
+}
+
+plane::plane (int t_w, int t_h, int w, int h, int x_ms, int y_ms) {
+    this -> height = h;
+    this -> width = w;
+    this -> tile_height = t_h;
+    this -> tile_width = t_w;
+    this -> x_move_speed = x_ms;
+    this -> y_move_speed = y_ms;
+    this -> x_wrapping = false;
+    this -> y_wrapping = false;
 }
 
 bool dynamic_tile::x_compare (dynamic_tile right_operand) {
