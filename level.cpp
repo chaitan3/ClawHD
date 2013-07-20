@@ -1,5 +1,6 @@
 #include "level.hpp"
-#include <zlib.h>
+//~ #include <zlib.h>
+#include "miniz.h"
 #include <cstring>
 
 level::level (string filename) {
@@ -68,10 +69,11 @@ level::level (string filename) {
         memcpy (&(c_pos.x), ptr_data + 12, 4);
         memcpy (&(c_pos.y), ptr_data + 16, 4);
         memcpy (&time, ptr_data + 20, 4);
+        //~ cout << ptr_data - inflated_data << endl;
         
         // copy info data
         ptr_data += 0x114;
-        char name [name_len], image [image_len], anim [anim_len];
+        char name [name_len + 1], image [image_len + 1], anim [anim_len + 1];
         memcpy (name, ptr_data, name_len);
         name [name_len] = '\0';
         memcpy (image, ptr_data + name_len, image_len);
@@ -84,17 +86,21 @@ level::level (string filename) {
             continue;
         dynamic_tile d_tile(string (name), string (image), string (anim), &c_pos, time);
         
+        char key [200], path [200];
         if (this -> image_file_lists.count (image) == 0) {
-            char *c = strchr (image, '_');
-            c[0] = '\0';
+            char *pos = strchr (image, '_');
+            int len = pos - image;
+            strncpy (key, image, len);
+            strcpy (path, image + len + 1);
+            key [len] = '\0';
             string suffix;
-            if (strcmp (image, "LEVEL") == 0)
-                suffix = string (c + 1);
+            if (strcmp (key, "LEVEL") == 0)
+                suffix = string (path);
             else
-                suffix = convert_folder_path_to_unix (c + 1);
-            string folder_images = DATA_PREFIX + image_sources [image] + 
-                SEPARATOR + suffix + SEPARATOR;
+                suffix = convert_folder_path_to_unix (path);
             
+            string folder_images = DATA_PREFIX + image_sources [key] + 
+                SEPARATOR + suffix + SEPARATOR;
             this -> image_file_lists [image] = get_directory_list (folder_images);
         }
             
@@ -102,13 +108,12 @@ level::level (string filename) {
     }
 }
 
-char* level::get_compressed_data (ifstream* file1, int offset, int inflated_len) {
-    ifstream* file = new ifstream ("l1"); 
+char* level::get_compressed_data (ifstream* file, int offset, int inflated_len) {
     file -> seekg (0, ios::end);
     int end = file -> tellg ();
     int deflated_len = end - offset;
-    file -> seekg (offset, ios::beg);
     char deflated_data [deflated_len];
+    file -> seekg (offset, ios::beg);
     file -> read (deflated_data, deflated_len);
     file -> close ();
     

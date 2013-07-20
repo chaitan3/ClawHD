@@ -2,8 +2,8 @@ CC = g++
 TARGET = test
 CFLAGS = -Wall -g
 LFLAGS = -g
-LIBS = -lz -lSDL2 -lSDL2_image
-OBJ = test.o util.o level.o display.o
+LIBS =  -lSDL2 -lSDL2_image
+OBJ = test.o util.o level.o display.o miniz.o
 all: $(TARGET)
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c $^

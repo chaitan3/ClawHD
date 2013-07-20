@@ -48,12 +48,15 @@ list <string>* get_directory_list (string dir) {
     list <string>* list_dir = new list <string>;
     DIR* ptr_dir = opendir (dir.c_str ());
     struct dirent* file_dir;
-    while ((file_dir = readdir (ptr_dir)) != NULL) {
-        if (file_dir -> d_name [0] != '.')
-            list_dir -> push_back (dir + string (file_dir -> d_name));
+    
+    if (ptr_dir != NULL) {
+        while ((file_dir = readdir (ptr_dir)) != NULL) {
+            if (file_dir -> d_name [0] != '.')
+                list_dir -> push_back (dir + string (file_dir -> d_name));
+        }
+        list_dir -> sort ();
+        closedir (ptr_dir);
     }
-    list_dir -> sort ();
-    closedir (ptr_dir);
     return list_dir;
 }
 
