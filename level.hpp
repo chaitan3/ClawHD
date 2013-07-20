@@ -1,0 +1,62 @@
+#ifndef LEVEL_H
+#define LEVEL_H
+#include "util.hpp"
+#include "kdtree.hpp"
+#include <map>
+
+#define DATA_PREFIX string ("../Images/")
+#define SEPARATOR string ("/")
+
+class plane {
+    int height;
+    int width;
+    int32_t **tiles;
+    
+    public:
+    string folder_prefix;
+    
+    char* import_tile_ids (char *);
+    int32_t** get_tile_ids ();
+    char* set_width_and_height (char*);
+    int get_width ();
+    int get_height ();
+};
+
+class dynamic_tile {
+    string name;
+    string image;
+    string animation;
+    coords c_pos;
+    int time;
+    
+    public:
+    coords* get_coords ();
+    dynamic_tile (string, string, string, coords*, int);
+    bool x_compare (dynamic_tile);
+    bool y_compare (dynamic_tile);
+    string get_image ();
+    dynamic_tile () {};
+};
+    
+
+class level {
+    coords c_start_loc;
+    kdtree <dynamic_tile> d_tiles;
+    plane p_action, p_bg, p_fg;
+    string folder_tiles, folder_palette;
+    map <string, string> image_sources;
+    map <string, list <string>*> image_file_lists;
+    
+    char* get_compressed_data (ifstream*, int, int);
+    
+    public:
+    plane* get_action_plane ();
+    kdtree <dynamic_tile>* get_dynamic_tiles ();
+    level (string);
+    coords* get_start_location ();
+    string get_image_file (string, int);
+};
+
+
+#endif
+

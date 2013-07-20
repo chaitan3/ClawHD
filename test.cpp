@@ -21,28 +21,24 @@
  * 
  */
 
-#include "level.h"
-#include "util.h"
-#include "display.h"
+#include "level.hpp"
+#include "kdtree.hpp"
+#include "util.hpp"
+#include "display.hpp"
 #include <SDL2/SDL.h>
 
 int main (int argc, char **argv)
 {   
     display disp;
     level l1 ("l1_orig");
-    coords* state = l1.get_start_location ();
+    coords* start_state = l1.get_start_location ();
+    coords state (start_state -> x, start_state -> y);
     
     //~ cout << l1.p_bg.get_height() << " " << l1.p_bg.get_width() << endl;
     //~ cout << l1.p_action.get_height() << " " << l1.p_action.get_width() << endl;
     //~ cout << l1.p_fg.get_height() << " " << l1.p_fg.get_width() << endl;
     
-    string prefix;
-    //~ prefix = "../Images/LEVEL1/TILES/BACK/";
-    //~ disp.render_screen (prefix, l1.p_bg.get_tile_ids (), &state);
-    prefix = "../Images/LEVEL1/TILES/ACTION/";
-    int32_t** tiles = l1.p_action.get_tile_ids ();
-    
-    disp.render_screen (prefix, tiles, state);
+    disp.render_screen (&l1, &state);
     
     SDL_Event event;
     bool update_screen = false;
@@ -55,19 +51,19 @@ int main (int argc, char **argv)
                 case SDL_KEYDOWN:
                     const Uint8* key_state = SDL_GetKeyboardState (NULL);
                     if (key_state [SDL_SCANCODE_UP]) {
-                        state -> y -= scroll_speed;
+                        state.y -= scroll_speed;
                         update_screen = true;
                     }
                     else if (key_state [SDL_SCANCODE_DOWN]) {
-                        state -> y += scroll_speed;
+                        state.y += scroll_speed;
                         update_screen = true;
                     } 
                     else if (key_state [SDL_SCANCODE_LEFT]) {
-                        state -> x -= scroll_speed;
+                        state.x -= scroll_speed;
                         update_screen = true;
                     } 
                     else if (key_state [SDL_SCANCODE_RIGHT]) {
-                        state -> x += scroll_speed;
+                        state.x += scroll_speed;
                         update_screen = true;
                     } 
                     else if (key_state [SDL_SCANCODE_ESCAPE]) {
@@ -77,8 +73,10 @@ int main (int argc, char **argv)
                     
             }
         }
-        if (update_screen) 
-            disp.render_screen (prefix, tiles, state);
+        if (update_screen) {
+            disp.render_screen (&l1, &state);
+            update_screen = false;
+        }
         SDL_Delay (latency);
     }
     

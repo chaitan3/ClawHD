@@ -1,7 +1,9 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 #include <SDL2/SDL.h>
-#include "util.h"
+#include "util.hpp"
+#include "level.hpp"
+#include "kdtree.hpp"
 #include <map>
 
 #define TILE_SIZE 64
@@ -28,7 +30,7 @@ class display {
     int copy_tile_to_display (string, coords*);
 
     public:
-    void render_screen (string, int32_t**, coords*);
+    void render_screen (level*, coords*);
     display ();
     ~display ();
 };
