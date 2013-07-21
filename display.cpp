@@ -69,7 +69,7 @@ void display::import_tile_texture (string file) {
 }
 
 void display::render_screen (level* l_current, coords* c_pos) {
-    kdtree <dynamic_tile>* dynamic_tiles = l_current -> get_dynamic_tiles ();
+    kdtree <dynamic_tile*>* dynamic_tiles = l_current -> get_dynamic_tiles ();
     
     coords c_draw_pos;
     int i, j, i_start, j_start;
@@ -105,12 +105,14 @@ void display::render_screen (level* l_current, coords* c_pos) {
     // Render Dynamic Tiles
     coords c_top_left (left - RENDERER_PADDING, top - RENDERER_PADDING);
     coords c_bottom_right (left + this -> width + RENDERER_PADDING, top + this -> height + RENDERER_PADDING);
-    list <dynamic_tile>* interior_elements = dynamic_tiles -> range_search (&c_top_left, &c_bottom_right);
+    list <dynamic_tile*>* interior_elements = dynamic_tiles -> range_search (&c_top_left, &c_bottom_right);
+    interior_elements -> sort (dynamic_tile::z_compare);
     
-    list <dynamic_tile>::iterator it;
+    list <dynamic_tile*>::iterator it;
     for (it = interior_elements -> begin (); it != interior_elements -> end (); it++) {
-        coords* c_tile_pos = it -> get_coords ();
-        string tile = l_current -> get_image_file (it -> get_image (), 0);
+        dynamic_tile* d_tile = *it;
+        coords* c_tile_pos = d_tile -> get_coords ();
+        string tile = l_current -> get_image_file (d_tile -> get_image (), 0);
         c_draw_pos.x = c_tile_pos -> x - left;
         c_draw_pos.y = c_tile_pos -> y - top;
         this -> copy_tile_to_display (tile, &c_draw_pos);

@@ -28,15 +28,23 @@
 #include "display.hpp"
 #include <SDL2/SDL.h>
 
+#define CLAW "CLAW_IMAGES"
+
 int main (int argc, char **argv)
 {   
     display disp;
     level l1 ("l1_orig");
-    animation anim ("../Extracted/CLAW/ANIS/STAND.ANI");
     coords* start_state = l1.get_start_location ();
-    coords state (start_state -> x, start_state -> y);
+    //~ animation anim ("../Extracted/CLAW/ANIS/STAND.ANI");
+    kdtree <dynamic_tile*>* d_tiles = l1.get_dynamic_tiles ();
+    dynamic_tile* d_claw = new dynamic_tile ("Captain Claw", CLAW, "", start_state, 3000);
+    d_tiles -> insert (d_claw);
+    string folder_images = DATA_PREFIX + convert_folder_path_to_unix (CLAW) + SEPARATOR;
+    l1.put_image_files (CLAW, folder_images);
     
-    disp.render_screen (&l1, &state);
+    coords *state = d_claw -> get_coords ();
+    
+    disp.render_screen (&l1, state);
     
     SDL_Event event;
     bool update_screen = false;
@@ -49,19 +57,19 @@ int main (int argc, char **argv)
                 case SDL_KEYDOWN:
                     const Uint8* key_state = SDL_GetKeyboardState (NULL);
                     if (key_state [SDL_SCANCODE_UP]) {
-                        state.y -= scroll_speed;
+                        state -> y -= scroll_speed;
                         update_screen = true;
                     }
                     else if (key_state [SDL_SCANCODE_DOWN]) {
-                        state.y += scroll_speed;
+                        state -> y += scroll_speed;
                         update_screen = true;
                     } 
                     else if (key_state [SDL_SCANCODE_LEFT]) {
-                        state.x -= scroll_speed;
+                        state -> x -= scroll_speed;
                         update_screen = true;
                     } 
                     else if (key_state [SDL_SCANCODE_RIGHT]) {
-                        state.x += scroll_speed;
+                        state -> x += scroll_speed;
                         update_screen = true;
                     } 
                     else if (key_state [SDL_SCANCODE_ESCAPE]) {
@@ -72,7 +80,7 @@ int main (int argc, char **argv)
             }
         }
         if (update_screen) {
-            disp.render_screen (&l1, &state);
+            disp.render_screen (&l1, state);
             update_screen = false;
         }
         SDL_Delay (latency);

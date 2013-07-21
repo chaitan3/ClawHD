@@ -2,9 +2,9 @@ Bugs:
     Powdered KEG Y U NO USE MID POINT
     Plane movement speed
     Read PID files directly
-    Check all classes are passed as pointers to functions, mainly string class and dynamic_tile
+    Check if string class takes too much memory in conversions
     simplify constructur functions for classes
-    change name to logic and time to z-coord
+    change name to logic
 Animations
 Physics
 Menu

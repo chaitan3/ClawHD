@@ -78,7 +78,7 @@ level::level (string filename) {
     
     // Start dynamic tiles
     ptr_data += 0x1A;
-    int name_len, image_len, anim_len, time;
+    int name_len, image_len, anim_len, z;
     coords c_pos;
     
     while (ptr_data < ptr_end) {
@@ -90,7 +90,7 @@ level::level (string filename) {
         memcpy (&anim_len, ptr_data + 8, 4);
         memcpy (&(c_pos.x), ptr_data + 12, 4);
         memcpy (&(c_pos.y), ptr_data + 16, 4);
-        memcpy (&time, ptr_data + 20, 4);
+        memcpy (&z, ptr_data + 20, 4);
         
         // copy info data
         ptr_data += 0x114;
@@ -105,7 +105,7 @@ level::level (string filename) {
         
         if (strcmp ("LEVEL_ARCHESFRONT", image) == 0)
             continue;
-        dynamic_tile d_tile(string (name), string (image), string (anim), &c_pos, time);
+        dynamic_tile* d_tile = new dynamic_tile (string (name), string (image), string (anim), &c_pos, z);
         
         char key [200], path [200];
         if (this -> image_file_lists.count (image) == 0) {
@@ -122,12 +122,10 @@ level::level (string filename) {
             
             string folder_images = DATA_PREFIX + image_sources [key] + 
                 SEPARATOR + suffix + SEPARATOR;
-            this -> image_file_lists [image] = get_directory_list (folder_images);
+            this -> put_image_files (image, folder_images);
         }
-            
         this -> d_tiles.insert (d_tile);
     }
-    
 }
 
 char* level::get_compressed_data (ifstream* file, int offset, int inflated_len) {
@@ -164,12 +162,16 @@ plane* level::get_plane (int i) {
     return this -> planes [i];
 }
 
-kdtree <dynamic_tile>* level::get_dynamic_tiles () {
+kdtree <dynamic_tile*>* level::get_dynamic_tiles () {
     return &(this -> d_tiles);
 }
 
 string level::get_image_file (string image, int index) {
     return this -> image_file_lists [image] -> front ();
+}
+
+void level::put_image_files (string image, string folder_images) {
+    this -> image_file_lists [image] = get_directory_list (folder_images);
 }
 
 char* plane::import_tile_ids (char *ptr) {
@@ -207,28 +209,36 @@ plane::plane (int t_w, int t_h, int w, int h, int x_ms, int y_ms) {
     this -> y_wrapping = false;
 }
 
-bool dynamic_tile::x_compare (dynamic_tile right_operand) {
-    coords* c_right = right_operand.get_coords ();
+bool dynamic_tile::x_compare (dynamic_tile* right_operand) {
+    coords* c_right = right_operand -> get_coords ();
     return this -> c_pos.x < c_right -> x;
 }
 
-bool dynamic_tile::y_compare (dynamic_tile right_operand) {
-    coords* c_right = right_operand.get_coords ();
+bool dynamic_tile::y_compare (dynamic_tile* right_operand) {
+    coords* c_right = right_operand -> get_coords ();
     return this -> c_pos.y < c_right -> y;
+}
+
+bool dynamic_tile::z_compare (dynamic_tile* right_operand) {
+    return this -> z < right_operand -> get_z ();
 }
 
 string dynamic_tile::get_image () {
     return this -> image;
 }
 
+int dynamic_tile::get_z () {
+    return this -> z;
+}
+
 coords* dynamic_tile::get_coords () {
     return &(this -> c_pos);
 }
 
-dynamic_tile::dynamic_tile (string n, string i, string a, coords* c, int t) {
+dynamic_tile::dynamic_tile (string n, string i, string a, coords* c, int c_z) {
     this -> name = n;
     this -> image = i;
     this -> animation = a;
     this -> c_pos = *c;
-    this -> time = t;
+    this -> z = c_z;
 }

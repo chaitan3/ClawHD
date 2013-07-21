@@ -31,13 +31,15 @@ class dynamic_tile {
     string image;
     string animation;
     coords c_pos;
-    int time;
+    int z;
     
     public:
     coords* get_coords ();
+    int get_z ();
     dynamic_tile (string, string, string, coords*, int);
-    bool x_compare (dynamic_tile);
-    bool y_compare (dynamic_tile);
+    bool x_compare (dynamic_tile*);
+    bool y_compare (dynamic_tile*);
+    bool z_compare (dynamic_tile*);
     string get_image ();
     dynamic_tile () {};
 };
@@ -45,7 +47,7 @@ class dynamic_tile {
 
 class level {
     coords c_start_loc;
-    kdtree <dynamic_tile> d_tiles;
+    kdtree <dynamic_tile*> d_tiles;
     vector <plane*> planes;
     int num_planes;
     plane* action_plane;
@@ -60,9 +62,10 @@ class level {
     int get_num_planes ();
     coords* get_start_location ();
     string get_image_file (string, int);
+    void put_image_files (string, string); 
     plane* get_action_plane ();
     plane* get_plane (int);
-    kdtree <dynamic_tile>* get_dynamic_tiles ();
+    kdtree <dynamic_tile*>* get_dynamic_tiles ();
 };
 
 

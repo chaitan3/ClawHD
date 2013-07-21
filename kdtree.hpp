@@ -18,6 +18,7 @@ class node {
 template <class data_type>
 class kdtree {
     node<data_type>* root;
+    
     void actual_insert (data_type data, node <data_type>* curr, int depth) {
         if (curr == NULL) {
             this -> root = new node <data_type> (data);
@@ -25,10 +26,10 @@ class kdtree {
         else {
             bool result;
             if (depth % 2 == 0) {
-                result = data.x_compare (curr -> data);
+                result = data -> x_compare (curr -> data);
             }
             else {
-                result = data.y_compare (curr -> data);
+                result = data -> y_compare (curr -> data);
             }
             if (result) {
                 if (curr -> left == NULL) {
@@ -54,7 +55,7 @@ class kdtree {
          
         if (curr == NULL) return;   
             
-        coords *c_pos = curr -> data.get_coords ();
+        coords *c_pos = curr -> data -> get_coords ();
         int x = c_pos -> x;
         int y = c_pos -> y;
         
@@ -84,7 +85,7 @@ class kdtree {
         }
     }
     void actual_print_tree (node<data_type>* curr, int depth, bool right) {
-        coords *c_pos = curr -> data.get_coords ();
+        coords *c_pos = curr -> data -> get_coords ();
         cout << depth << " " << c_pos -> x << " " << c_pos -> y << " " << right << endl;
         if (curr -> left != NULL)
             actual_print_tree (curr -> left, depth + 1, false);

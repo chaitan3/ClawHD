@@ -58,8 +58,10 @@ list <string>* get_directory_list (string dir) {
     
     if (ptr_dir != NULL) {
         while ((file_dir = readdir (ptr_dir)) != NULL) {
-            if (file_dir -> d_name [0] != '.')
+            if (file_dir -> d_name [0] != '.') {
                 list_dir -> push_back (dir + string (file_dir -> d_name));
+                //~ cout << file_dir -> d_name << endl;
+            }
         }
         list_dir -> sort ();
         closedir (ptr_dir);
