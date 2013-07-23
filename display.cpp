@@ -1,5 +1,6 @@
 #include "display.hpp"
 #include <SDL2/SDL_image.h>
+#include <algorithm>
 
 display::display() {
     this -> height = 600;
@@ -105,14 +106,36 @@ void display::render_screen (level* l_current, coords* c_pos) {
     // Render Dynamic Tiles
     coords c_top_left (left - RENDERER_PADDING, top - RENDERER_PADDING);
     coords c_bottom_right (left + this -> width + RENDERER_PADDING, top + this -> height + RENDERER_PADDING);
-    list <dynamic_tile*>* interior_elements = dynamic_tiles -> range_search (&c_top_left, &c_bottom_right);
-    interior_elements -> sort (dynamic_tile::z_compare);
+    vector <dynamic_tile*>* interior_elements = dynamic_tiles -> range_search (&c_top_left, &c_bottom_right);
+    sort (interior_elements -> begin (), interior_elements -> end (), z_compare);
     
-    list <dynamic_tile*>::iterator it;
+    vector <dynamic_tile*>::iterator it;
     for (it = interior_elements -> begin (); it != interior_elements -> end (); it++) {
         dynamic_tile* d_tile = *it;
         coords* c_tile_pos = d_tile -> get_coords ();
-        string tile = l_current -> get_image_file (d_tile -> get_image (), 0);
+        
+        string tile;
+        string anim = d_tile -> get_anim ();
+        string image = d_tile -> get_image ();
+        if ((anim.length () > 0) && (anim [0] == 'C')) {
+            int frame = 0;
+            animation* a_curr = l_current -> get_animation (anim);
+            
+            int curr_time = SDL_GetTicks ();
+            if (curr_time > d_tile -> last_update_time + a_curr -> get_duration (d_tile -> frame)) {
+                (d_tile -> frame) ++;
+                if (d_tile -> frame == a_curr -> get_num_frames ())
+                    d_tile -> frame = 0;
+                d_tile -> last_update_time = curr_time;
+            }
+            frame = a_curr -> get_frame (d_tile -> frame);
+            tile = DATA_PREFIX + convert_folder_path_to_unix ((char *) image.c_str ()) + 
+                SEPARATOR + string ("FRAME") + convert_to_three_digits (frame) + 
+                TEXTURE_FILE_TYPE;
+        }
+        else {
+            tile = l_current -> get_default_image_file (image);
+        }
         c_draw_pos.x = c_tile_pos -> x - left;
         c_draw_pos.y = c_tile_pos -> y - top;
         this -> copy_tile_to_display (tile, &c_draw_pos);

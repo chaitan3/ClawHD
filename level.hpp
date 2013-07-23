@@ -1,9 +1,11 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 #include "util.hpp"
+#include "animate.hpp"
 #include "kdtree.hpp"
 
 #define DATA_PREFIX string ("../Images/")
+#define DATA2_PREFIX string ("../Extracted/")
 #define SEPARATOR string ("/")
 
 class plane {
@@ -29,31 +31,38 @@ class plane {
 class dynamic_tile {
     string name;
     string image;
-    string animation;
+    string anim;
     coords c_pos;
     int z;
     
     public:
+    int frame;
+    int last_update_time;
+    
     coords* get_coords ();
     int get_z ();
     dynamic_tile (string, string, string, coords*, int);
     bool x_compare (dynamic_tile*);
     bool y_compare (dynamic_tile*);
-    bool z_compare (dynamic_tile*);
     string get_image ();
+    string get_anim ();
     dynamic_tile () {};
 };
-    
+
+bool z_compare (dynamic_tile*, dynamic_tile*);    
 
 class level {
     coords c_start_loc;
-    kdtree <dynamic_tile*> d_tiles;
     vector <plane*> planes;
-    int num_planes;
+    int num_planes, num_objects;
     plane* action_plane;
     string folder_tiles, folder_palette;
     map <string, string> image_sources;
-    map <string, list <string>*> image_file_lists;
+    
+    // More game related than level
+    kdtree <dynamic_tile*> d_tiles;
+    map <string, vector <string>*> image_file_lists;
+    map <string, animation*> a_loaded;
     
     char* get_compressed_data (ifstream*, int, int);
     
@@ -61,11 +70,12 @@ class level {
     level (string);
     int get_num_planes ();
     coords* get_start_location ();
-    string get_image_file (string, int);
+    string get_default_image_file (string);
     void put_image_files (string, string); 
     plane* get_action_plane ();
     plane* get_plane (int);
     kdtree <dynamic_tile*>* get_dynamic_tiles ();
+    animation* get_animation (string);
 };
 
 

@@ -1,6 +1,6 @@
 #ifndef KDTREE_H
 #define KDTREE_H
-#include <list>
+#include <vector>
 
 template <class data_type> 
 class node {
@@ -50,7 +50,7 @@ class kdtree {
         }
     }
     
-    void actual_range_search (list <data_type>* elements, coords* c_top_left, coords* c_bottom_right,
+    void actual_range_search (vector <data_type>* elements, coords* c_top_left, coords* c_bottom_right,
         node <data_type>* curr, int depth) {
          
         if (curr == NULL) return;   
@@ -98,8 +98,8 @@ class kdtree {
         this -> actual_insert (data, this -> root, 0);
     }
     
-    list <data_type>* range_search (coords* c_top_left, coords* c_bottom_right) {
-        list <data_type>* interior_elements = new list <data_type> ();
+    vector <data_type>* range_search (coords* c_top_left, coords* c_bottom_right) {
+        vector <data_type>* interior_elements = new vector <data_type> ();
         actual_range_search (interior_elements, c_top_left, c_bottom_right, this -> root, 0);
         return interior_elements;
     }

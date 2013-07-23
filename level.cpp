@@ -1,5 +1,4 @@
 #include "level.hpp"
-//~ #include <zlib.h>
 #include "miniz.h"
 #include <cstring>
 
@@ -57,7 +56,10 @@ level::level (string filename) {
         memcpy (&x_move_speed, ptr_data, 4);
         ptr_data += 0x04;
         memcpy (&y_move_speed, ptr_data, 4);
-        ptr_data += 0x2c;
+        ptr_data += 0x0c;
+        if (i == 1)
+            memcpy (&(this -> num_objects), ptr_data, 4);
+        ptr_data += 0x20;
         
         plane* p = new plane (tile_width, tile_height, width, height, x_move_speed, y_move_speed);
         this -> planes.push_back (p);
@@ -81,9 +83,7 @@ level::level (string filename) {
     int name_len, image_len, anim_len, z;
     coords c_pos;
     
-    while (ptr_data < ptr_end) {
-        if (((int)ptr_data [0] == -86) && ((int)ptr_data [1] == 3))
-            break;
+    for (int i = 0; i < num_objects; i++)  {
         // copy basic data
         memcpy (&name_len, ptr_data, 4);
         memcpy (&image_len, ptr_data + 4, 4);
@@ -166,8 +166,18 @@ kdtree <dynamic_tile*>* level::get_dynamic_tiles () {
     return &(this -> d_tiles);
 }
 
-string level::get_image_file (string image, int index) {
-    return this -> image_file_lists [image] -> front ();
+animation* level::get_animation (string anim) {
+    if (this -> a_loaded.count (anim) == 0) {
+        animation* a_new = new animation (DATA2_PREFIX + 
+            convert_folder_path_to_unix ((char *)anim.c_str ()) + 
+            ANIMATION_FILE_TYPE);
+        this -> a_loaded [anim] = a_new;
+    }
+    return this -> a_loaded [anim];
+}
+
+string level::get_default_image_file (string image) {
+    return this -> image_file_lists [image] -> at (0);
 }
 
 void level::put_image_files (string image, string folder_images) {
@@ -219,12 +229,16 @@ bool dynamic_tile::y_compare (dynamic_tile* right_operand) {
     return this -> c_pos.y < c_right -> y;
 }
 
-bool dynamic_tile::z_compare (dynamic_tile* right_operand) {
-    return this -> z < right_operand -> get_z ();
+bool z_compare (dynamic_tile* left, dynamic_tile* right) {
+    return left -> get_z () < right -> get_z ();
 }
 
 string dynamic_tile::get_image () {
     return this -> image;
+}
+
+string dynamic_tile::get_anim () {
+    return this -> anim;
 }
 
 int dynamic_tile::get_z () {
@@ -238,7 +252,11 @@ coords* dynamic_tile::get_coords () {
 dynamic_tile::dynamic_tile (string n, string i, string a, coords* c, int c_z) {
     this -> name = n;
     this -> image = i;
-    this -> animation = a;
+    this -> anim = a;
     this -> c_pos = *c;
     this -> z = c_z;
+    
+    frame = -1;
+    last_update_time = -1;
 }
+

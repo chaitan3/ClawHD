@@ -51,8 +51,8 @@ bool f_exists (string name) {
   return stat (name.c_str(), &buffer) == 0; 
 }
 
-list <string>* get_directory_list (string dir) {
-    list <string>* list_dir = new list <string>;
+vector <string>* get_directory_list (string dir) {
+    vector <string>* list_dir = new vector <string>;
     DIR* ptr_dir = opendir (dir.c_str ());
     struct dirent* file_dir;
     
@@ -63,7 +63,7 @@ list <string>* get_directory_list (string dir) {
                 //~ cout << file_dir -> d_name << endl;
             }
         }
-        list_dir -> sort ();
+        sort (list_dir -> begin (), list_dir -> end ());
         closedir (ptr_dir);
     }
     return list_dir;

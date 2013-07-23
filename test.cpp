@@ -33,23 +33,20 @@
 int main (int argc, char **argv)
 {   
     display disp;
-    level l1 ("l1_orig");
+    level l1 ("../Extracted/LEVEL1/WORLDS/WORLD.WWD");
     coords* start_state = l1.get_start_location ();
     //~ animation anim ("../Extracted/CLAW/ANIS/STAND.ANI");
     kdtree <dynamic_tile*>* d_tiles = l1.get_dynamic_tiles ();
-    dynamic_tile* d_claw = new dynamic_tile ("Captain Claw", CLAW, "", start_state, 3000);
+    dynamic_tile* d_claw = new dynamic_tile ("Captain Claw", CLAW, "CLAW_ANIS_STAND", start_state, 3000);
     d_tiles -> insert (d_claw);
     string folder_images = DATA_PREFIX + convert_folder_path_to_unix (CLAW) + SEPARATOR;
     l1.put_image_files (CLAW, folder_images);
     
     coords *state = d_claw -> get_coords ();
     
-    disp.render_screen (&l1, state);
-    
     SDL_Event event;
-    bool update_screen = false;
     int scroll_speed = 20;
-    int latency = 20;
+    int latency = 10;
     
     while (1) {
         while (SDL_PollEvent (&event)) {
@@ -58,19 +55,15 @@ int main (int argc, char **argv)
                     const Uint8* key_state = SDL_GetKeyboardState (NULL);
                     if (key_state [SDL_SCANCODE_UP]) {
                         state -> y -= scroll_speed;
-                        update_screen = true;
                     }
                     else if (key_state [SDL_SCANCODE_DOWN]) {
                         state -> y += scroll_speed;
-                        update_screen = true;
                     } 
                     else if (key_state [SDL_SCANCODE_LEFT]) {
                         state -> x -= scroll_speed;
-                        update_screen = true;
                     } 
                     else if (key_state [SDL_SCANCODE_RIGHT]) {
                         state -> x += scroll_speed;
-                        update_screen = true;
                     } 
                     else if (key_state [SDL_SCANCODE_ESCAPE]) {
                         exit (0);
@@ -79,10 +72,7 @@ int main (int argc, char **argv)
                     
             }
         }
-        if (update_screen) {
-            disp.render_screen (&l1, state);
-            update_screen = false;
-        }
+        disp.render_screen (&l1, state);
         SDL_Delay (latency);
     }
     

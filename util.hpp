@@ -5,7 +5,6 @@
 #include <string>
 #include <fstream>
 #include <stdint.h>
-#include <list>
 #include <vector>
 #include <map>
 
@@ -18,7 +17,7 @@ string convert_int_to_string (int);
 bool f_exists (string);
 string f_read_path (ifstream *, int, int);
 string convert_folder_path_to_unix (char*);
-list <string>* get_directory_list (string);
+vector <string>* get_directory_list (string);
 
 class coords {
     public:

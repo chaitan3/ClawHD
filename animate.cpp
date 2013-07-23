@@ -1,6 +1,7 @@
 #include "animate.hpp"
 
 animation::animation (string ani_file) {
+    cout << ani_file.c_str () << endl;
     ifstream f_ani (ani_file.c_str ());
     
     int cursor = 0x0c;
@@ -19,7 +20,7 @@ animation::animation (string ani_file) {
         cursor += 7;
         int frameID = f_read_short_int (&f_ani, cursor);
         int dur = f_read_short_int (&f_ani, cursor + 2);
-        cout << frameID << " " << dur << endl;
+        //~ cout << frameID << " " << dur << endl;
         
         this -> frames.push_back (frameID);
         this -> duration.push_back (dur);
@@ -28,3 +29,18 @@ animation::animation (string ani_file) {
     
     f_ani.close ();
 }
+
+int animation::get_frame (int index) {
+    return this -> frames [index];
+}
+
+int animation::get_num_frames () {
+    return this -> num_frames;
+}
+
+int animation::get_duration (int index) {
+    if (index < 0)
+        return 0;
+    return this -> duration [index];
+}
+    
