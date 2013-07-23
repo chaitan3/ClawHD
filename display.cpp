@@ -28,7 +28,7 @@ display::~display () {
     SDL_Quit ();
 }
 
-int display::copy_tile_to_display (string tile, coords* c_pos) {
+int display::copy_tile_to_display (string tile, coords* c_pos, bool mirrored) {
     SDL_Rect src, dest;
     int width, height;
     
@@ -45,7 +45,11 @@ int display::copy_tile_to_display (string tile, coords* c_pos) {
     dest.h = height;
     dest.x = c_pos -> x - width / 2;
     dest.y = c_pos -> y - height / 2;
-    int ret = SDL_RenderCopy (this -> renderer, texture, &src, &dest);
+    
+    SDL_RendererFlip flip = SDL_FLIP_NONE;
+    if (mirrored)
+        flip = SDL_FLIP_HORIZONTAL;
+    int ret = SDL_RenderCopyEx (this -> renderer, texture, &src, &dest, 0, NULL, flip);
     if (ret != 0) {
         cout << "Failed to copy texture: " << tile << endl;
         exit (1);
@@ -98,7 +102,7 @@ void display::render_screen (level* l_current, coords* c_pos) {
                     if (!f_exists (tile))
                         tile = p_curr -> folder_prefix + 
                         convert_int_to_string (tileID) + TEXTURE_FILE_TYPE;
-                    this -> copy_tile_to_display (tile, &c_draw_pos);
+                    this -> copy_tile_to_display (tile, &c_draw_pos, false);
                 }
             }
         }
@@ -138,7 +142,7 @@ void display::render_screen (level* l_current, coords* c_pos) {
         }
         c_draw_pos.x = c_tile_pos -> x - left;
         c_draw_pos.y = c_tile_pos -> y - top;
-        this -> copy_tile_to_display (tile, &c_draw_pos);
+        this -> copy_tile_to_display (tile, &c_draw_pos, d_tile -> mirrored);
     }
     SDL_RenderPresent(this -> renderer);
 }

@@ -15,16 +15,19 @@ animation::animation (string ani_file) {
     f_ani.read (buffer, image_len + 1);
     this -> image = string (buffer);
     
-    cursor += image_len + 1;
+    char c;
+    cursor += image_len;
     for (int i = 0; i < num_frames; i++) {
-        cursor += 7;
+        f_ani.seekg (cursor, ios::beg);
+        while ((c = f_ani.get ()) != 0x03);
+        cursor = (int)f_ani.tellg () + 5;
+        
         int frameID = f_read_short_int (&f_ani, cursor);
         int dur = f_read_short_int (&f_ani, cursor + 2);
         //~ cout << frameID << " " << dur << endl;
-        
         this -> frames.push_back (frameID);
         this -> duration.push_back (dur);
-        cursor += 13;
+        cursor += 4;
     }
     
     f_ani.close ();

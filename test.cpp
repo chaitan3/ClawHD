@@ -45,31 +45,47 @@ int main (int argc, char **argv)
     coords *state = d_claw -> get_coords ();
     
     SDL_Event event;
-    int scroll_speed = 20;
+    int scroll_speed = 9;
     int latency = 10;
     
     while (1) {
+        const Uint8* key_state = SDL_GetKeyboardState (NULL);
+        if (key_state [SDL_SCANCODE_RIGHT]) {
+            state -> x += scroll_speed;
+        }
+        else if (key_state [SDL_SCANCODE_LEFT]) {
+            state -> x -= scroll_speed;
+        }
+        
         while (SDL_PollEvent (&event)) {
             switch (event.type) {
                 case SDL_KEYDOWN:
-                    const Uint8* key_state = SDL_GetKeyboardState (NULL);
-                    if (key_state [SDL_SCANCODE_UP]) {
-                        state -> y -= scroll_speed;
+                    switch (event.key.keysym.scancode) {
+                        case SDL_SCANCODE_RIGHT:
+                            d_claw -> mirrored = false;
+                            d_claw -> set_anim ("CLAW_ANIS_WALK");
+                            break;
+                        case SDL_SCANCODE_LEFT:
+                            d_claw -> mirrored = true;
+                            d_claw -> set_anim ("CLAW_ANIS_WALK");
+                            break;
+                        case SDL_SCANCODE_ESCAPE:
+                            exit (0);
+                            break;
+                        default:
+                            break;
                     }
-                    else if (key_state [SDL_SCANCODE_DOWN]) {
-                        state -> y += scroll_speed;
-                    } 
-                    else if (key_state [SDL_SCANCODE_LEFT]) {
-                        state -> x -= scroll_speed;
-                    } 
-                    else if (key_state [SDL_SCANCODE_RIGHT]) {
-                        state -> x += scroll_speed;
-                    } 
-                    else if (key_state [SDL_SCANCODE_ESCAPE]) {
-                        exit (0);
-                    } 
                     break;
-                    
+                case SDL_KEYUP:
+                    switch (event.key.keysym.scancode) {
+                        case SDL_SCANCODE_RIGHT:
+                        case SDL_SCANCODE_LEFT:
+                            d_claw -> set_anim ("CLAW_ANIS_STAND");
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
             }
         }
         disp.render_screen (&l1, state);

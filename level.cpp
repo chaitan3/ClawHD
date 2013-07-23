@@ -241,6 +241,11 @@ string dynamic_tile::get_anim () {
     return this -> anim;
 }
 
+void dynamic_tile::set_anim (string anim_new) {
+    this -> anim = anim_new;
+}
+    
+
 int dynamic_tile::get_z () {
     return this -> z;
 }
@@ -256,7 +261,8 @@ dynamic_tile::dynamic_tile (string n, string i, string a, coords* c, int c_z) {
     this -> c_pos = *c;
     this -> z = c_z;
     
-    frame = -1;
-    last_update_time = -1;
+    this -> frame = -1;
+    this -> last_update_time = -1;
+    this -> mirrored = false;
 }
 

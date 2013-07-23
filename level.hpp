@@ -38,6 +38,7 @@ class dynamic_tile {
     public:
     int frame;
     int last_update_time;
+    bool mirrored;
     
     coords* get_coords ();
     int get_z ();
@@ -46,6 +47,7 @@ class dynamic_tile {
     bool y_compare (dynamic_tile*);
     string get_image ();
     string get_anim ();
+    void set_anim (string);
     dynamic_tile () {};
 };
 

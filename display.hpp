@@ -27,7 +27,7 @@ class display {
     int width;
     
     void import_tile_texture (string);
-    int copy_tile_to_display (string, coords*);
+    int copy_tile_to_display (string, coords*, bool);
 
     public:
     void render_screen (level*, coords*);
