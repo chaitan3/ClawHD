@@ -19,9 +19,13 @@ template <class data_type>
 class kdtree {
     node<data_type>* root;
     
-    void actual_insert (data_type data, node <data_type>* curr, int depth) {
+    void actual_insert (node <data_type>* new_node, node <data_type>* curr, int depth) {
+        if (new_node == NULL)
+            return;
+        
+        data_type data = new_node -> data;
         if (curr == NULL) {
-            this -> root = new node <data_type> (data);
+            this -> root = new_node;
         }
         else {
             bool result;
@@ -33,18 +37,18 @@ class kdtree {
             }
             if (result) {
                 if (curr -> left == NULL) {
-                    curr -> left = new node <data_type> (data);
+                    curr -> left = new_node;
                 }
                 else {
-                    actual_insert (data, curr -> left, depth + 1);
+                    actual_insert (new_node, curr -> left, depth + 1);
                 }
             }
             else {
                 if (curr -> right == NULL) {
-                    curr -> right = new node <data_type> (data);
+                    curr -> right = new_node;
                 }
                 else {
-                    actual_insert (data, curr -> right, depth + 1);
+                    actual_insert (new_node, curr -> right, depth + 1);
                 }
             }
         }
@@ -65,8 +69,9 @@ class kdtree {
             else if (x > c_bottom_right -> x)
                 actual_range_search (elements, c_top_left, c_bottom_right, curr -> left, depth + 1);
             else {
-                if ((c_top_left -> y <= y) && (y <= c_bottom_right -> y))
+                if ((c_top_left -> y <= y) && (y <= c_bottom_right -> y)) {
                     elements -> push_back (curr -> data);
+                }
                 actual_range_search (elements, c_top_left, c_bottom_right, curr -> left, depth + 1);
                 actual_range_search (elements, c_top_left, c_bottom_right, curr -> right, depth + 1);
             }
@@ -77,8 +82,9 @@ class kdtree {
             else if (y > c_bottom_right -> y)
                 actual_range_search (elements, c_top_left, c_bottom_right, curr -> left, depth + 1);
             else {
-                if ((c_top_left -> x <= x) && (x <= c_bottom_right -> x))
+                if ((c_top_left -> x <= x) && (x <= c_bottom_right -> x)) {
                     elements -> push_back (curr -> data);
+                }
                 actual_range_search (elements, c_top_left, c_bottom_right, curr -> left, depth + 1);
                 actual_range_search (elements, c_top_left, c_bottom_right, curr -> right, depth + 1);
             }
@@ -95,7 +101,43 @@ class kdtree {
     
     public:
     void insert (data_type data) {
-        this -> actual_insert (data, this -> root, 0);
+        node <data_type>* new_node = new node <data_type> (data);
+        this -> actual_insert (new_node, this -> root, 0);
+    }
+    
+    void remove (data_type data) {
+        int depth = 0;
+        bool result;
+        node <data_type>* curr = this -> root;
+        node <data_type>** conn;
+        
+        while (curr -> data != data) {
+            if (depth % 2 == 0) 
+                result = data -> x_compare (curr -> data);
+            else
+                result = data -> y_compare (curr -> data);
+            if (result) {
+                conn = &(curr -> left);
+                curr = curr -> left;
+            }
+            else {
+                conn = &(curr -> right);
+                curr = curr -> right;
+            }
+            depth += 1;
+        }
+        if (curr -> left != NULL) {
+            *conn = curr -> left;
+            this -> actual_insert (curr -> right, curr -> left, depth);
+        }
+        else if (curr -> right != NULL) {
+            *conn = curr -> right;
+            this -> actual_insert (curr -> left, curr -> right, depth);
+        }
+        else {
+            *conn = NULL;
+        }
+        //~ delete curr;
     }
     
     vector <data_type>* range_search (coords* c_top_left, coords* c_bottom_right) {

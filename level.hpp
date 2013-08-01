@@ -4,10 +4,6 @@
 #include "animate.hpp"
 #include "kdtree.hpp"
 
-#define DATA_PREFIX string ("../Images/")
-#define DATA2_PREFIX string ("../Extracted/")
-#define SEPARATOR string ("/")
-
 class plane {
     int height;
     int width;
@@ -73,7 +69,7 @@ class level {
     int get_num_planes ();
     coords* get_start_location ();
     string get_default_image_file (string);
-    void put_image_files (string, string); 
+    void put_image_files (string); 
     plane* get_action_plane ();
     plane* get_plane (int);
     kdtree <dynamic_tile*>* get_dynamic_tiles ();

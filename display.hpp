@@ -9,12 +9,20 @@
 #define RENDERER_PADDING 50
 #define TEXTURE_FILE_TYPE string(".png")
 
+class texture {
+    public:
+    SDL_Texture* tx;
+    coords* c_off;
+    
+    texture (SDL_Texture*, coords*);
+};
+
 class tile_memory_manager {
-    map <string, SDL_Texture*> textures;
+    map <string, texture*> textures;
     
     public:
-    SDL_Texture* get_tile_texture (string);
-    void put_tile_texture (string, SDL_Texture*);
+    texture* get_tile_texture (string);
+    void put_tile_texture (string, texture*);
     bool contains_tile (string);
     ~tile_memory_manager ();
 };

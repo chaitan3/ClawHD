@@ -71,11 +71,11 @@ level::level (string filename) {
     
     // Set folder names for each of the planes
     action_plane = planes [1];
-    this -> planes [0] -> folder_prefix = DATA_PREFIX + this -> folder_tiles + string ("/BACK/");
+    this -> planes [0] -> folder_prefix = this -> folder_tiles + string ("/BACK/");
     this -> planes [0] -> x_wrapping = true;
     this -> planes [0] -> y_wrapping = true;
-    this -> planes [1] -> folder_prefix = DATA_PREFIX + this -> folder_tiles + string ("/ACTION/");
-    this -> planes [2] -> folder_prefix = DATA_PREFIX + this -> folder_tiles + string ("/FRONT/");
+    this -> planes [1] -> folder_prefix = this -> folder_tiles + string ("/ACTION/");
+    this -> planes [2] -> folder_prefix = this -> folder_tiles + string ("/FRONT/");
     this -> planes [0] -> x_wrapping = true;
     
     // Start dynamic tiles
@@ -103,26 +103,20 @@ level::level (string filename) {
         anim [anim_len] = '\0';
         ptr_data += name_len + image_len + anim_len + 8;
         
+        char key [200], path [200];
+        char *pos = strchr (image, '_');
+        int len = pos - image;
+        strncpy (key, image, len);
+        strcpy (path, image + len + 1);
+        key [len] = '\0';
+        string folder_images = image_sources [key] + string ("_") + string (path);
+        
         if (strcmp ("LEVEL_ARCHESFRONT", image) == 0)
             continue;
-        dynamic_tile* d_tile = new dynamic_tile (string (name), string (image), string (anim), &c_pos, z);
+        dynamic_tile* d_tile = new dynamic_tile (string (name), folder_images, string (anim), &c_pos, z);
         
-        char key [200], path [200];
-        if (this -> image_file_lists.count (image) == 0) {
-            char *pos = strchr (image, '_');
-            int len = pos - image;
-            strncpy (key, image, len);
-            strcpy (path, image + len + 1);
-            key [len] = '\0';
-            string suffix;
-            if (strcmp (key, "LEVEL") == 0)
-                suffix = string (path);
-            else
-                suffix = convert_folder_path_to_unix (path);
-            
-            string folder_images = DATA_PREFIX + image_sources [key] + 
-                SEPARATOR + suffix + SEPARATOR;
-            this -> put_image_files (image, folder_images);
+        if (this -> image_file_lists.count (folder_images) == 0) {
+            this -> put_image_files (folder_images);
         }
         this -> d_tiles.insert (d_tile);
     }
@@ -168,9 +162,7 @@ kdtree <dynamic_tile*>* level::get_dynamic_tiles () {
 
 animation* level::get_animation (string anim) {
     if (this -> a_loaded.count (anim) == 0) {
-        animation* a_new = new animation (DATA2_PREFIX + 
-            convert_folder_path_to_unix ((char *)anim.c_str ()) + 
-            ANIMATION_FILE_TYPE);
+        animation* a_new = new animation (anim);
         this -> a_loaded [anim] = a_new;
     }
     return this -> a_loaded [anim];
@@ -180,8 +172,8 @@ string level::get_default_image_file (string image) {
     return this -> image_file_lists [image] -> at (0);
 }
 
-void level::put_image_files (string image, string folder_images) {
-    this -> image_file_lists [image] = get_directory_list (folder_images);
+void level::put_image_files (string image) {
+    this -> image_file_lists [image] = get_directory_list (image);
 }
 
 char* plane::import_tile_ids (char *ptr) {

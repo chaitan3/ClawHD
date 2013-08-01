@@ -34,8 +34,8 @@ int display::copy_tile_to_display (string tile, coords* c_pos, bool mirrored) {
     
     if (!(this -> tmm.contains_tile (tile)))
         this -> import_tile_texture (tile);
-    SDL_Texture* texture = this -> tmm.get_tile_texture (tile);
-    SDL_QueryTexture (texture, NULL, NULL, &width, &height);
+    texture* t_curr = this -> tmm.get_tile_texture (tile);
+    SDL_QueryTexture (t_curr -> tx, NULL, NULL, &width, &height);
     
     src.x = 0;
     src.y = 0;
@@ -43,13 +43,13 @@ int display::copy_tile_to_display (string tile, coords* c_pos, bool mirrored) {
     src.h = height;
     dest.w = width;
     dest.h = height;
-    dest.x = c_pos -> x - width / 2;
-    dest.y = c_pos -> y - height / 2;
+    dest.x = c_pos -> x + t_curr -> c_off -> x;
+    dest.y = c_pos -> y + t_curr -> c_off -> y;
     
     SDL_RendererFlip flip = SDL_FLIP_NONE;
     if (mirrored)
         flip = SDL_FLIP_HORIZONTAL;
-    int ret = SDL_RenderCopyEx (this -> renderer, texture, &src, &dest, 0, NULL, flip);
+    int ret = SDL_RenderCopyEx (this -> renderer, t_curr -> tx, &src, &dest, 0, NULL, flip);
     if (ret != 0) {
         cout << "Failed to copy texture: " << tile << endl;
         exit (1);
@@ -58,18 +58,20 @@ int display::copy_tile_to_display (string tile, coords* c_pos, bool mirrored) {
 }
 
 void display::import_tile_texture (string file) {
-    SDL_Surface* surface = IMG_Load (file.c_str());
+    string t_file = DATA_PREFIX + convert_folder_path_to_unix (file) + TEXTURE_FILE_TYPE;
+    SDL_Surface* surface = IMG_Load (t_file.c_str ());
     if (surface == NULL) {
         cout << "Failed to load surface: " << file << endl;
         exit(1);
     }    
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(this -> renderer, surface);
-    if (texture == NULL) {
+    SDL_Texture* tx = SDL_CreateTextureFromSurface(this -> renderer, surface);
+    if (tx == NULL) {
         cout << "Failed to load texture: " << file << endl;
         exit(1);
     }
-        
-    this -> tmm.put_tile_texture (file, texture);
+    coords* c_off = get_offset_from_pid (file);
+    this -> tmm.put_tile_texture (file, new texture (tx, c_off));
+    
     SDL_FreeSurface (surface);
 }
 
@@ -92,16 +94,16 @@ void display::render_screen (level* l_current, coords* c_pos) {
         int num_h_tiles =  p_curr -> get_height ();
         i_start = top / TILE_SIZE;
         j_start = left / TILE_SIZE;
-        for (i = i_start, c_draw_pos.y = i_start * TILE_SIZE - top + TILE_SIZE / 2; c_draw_pos.y < this -> height + TILE_SIZE / 2; i++, c_draw_pos.y += TILE_SIZE) {
-            for (j = j_start, c_draw_pos.x = j_start * TILE_SIZE - left + TILE_SIZE / 2; c_draw_pos.x < this -> width + TILE_SIZE / 2; j++, c_draw_pos.x += TILE_SIZE) {
+        for (i = i_start, c_draw_pos.y = i_start * TILE_SIZE - top; c_draw_pos.y < this -> height; i++, c_draw_pos.y += TILE_SIZE) {
+            for (j = j_start, c_draw_pos.x = j_start * TILE_SIZE - left; c_draw_pos.x < this -> width; j++, c_draw_pos.x += TILE_SIZE) {
                 
                 int tileID = tiles [i % num_h_tiles][j % num_w_tiles];
                 if (tileID >= 0) {
                     string tile = p_curr -> folder_prefix +
-                    convert_to_three_digits (tileID) + TEXTURE_FILE_TYPE;
-                    if (!f_exists (tile))
-                        tile = p_curr -> folder_prefix + 
-                        convert_int_to_string (tileID) + TEXTURE_FILE_TYPE;
+                    convert_to_three_digits (tileID);
+                    //~ if (!f_exists (tile))
+                        //~ tile = p_curr -> folder_prefix + 
+                        //~ convert_int_to_string (tileID);
                     this -> copy_tile_to_display (tile, &c_draw_pos, false);
                 }
             }
@@ -133,9 +135,7 @@ void display::render_screen (level* l_current, coords* c_pos) {
                 d_tile -> last_update_time = curr_time;
             }
             frame = a_curr -> get_frame (d_tile -> frame);
-            tile = DATA_PREFIX + convert_folder_path_to_unix ((char *) image.c_str ()) + 
-                SEPARATOR + string ("FRAME") + convert_to_three_digits (frame) + 
-                TEXTURE_FILE_TYPE;
+            tile = image + string ("_FRAME") + convert_to_three_digits (frame);
         }
         else {
             tile = l_current -> get_default_image_file (image);
@@ -147,12 +147,12 @@ void display::render_screen (level* l_current, coords* c_pos) {
     SDL_RenderPresent(this -> renderer);
 }
 
-SDL_Texture* tile_memory_manager::get_tile_texture (string tile) {
+texture* tile_memory_manager::get_tile_texture (string tile) {
     return this -> textures [tile];
 }
 
-void tile_memory_manager::put_tile_texture (string tile, SDL_Texture* texture) {
-    this -> textures [tile] = texture;
+void tile_memory_manager::put_tile_texture (string tile, texture* t_new) {
+    this -> textures [tile] = t_new;
 }
 
 bool tile_memory_manager::contains_tile (string tile) {
@@ -160,9 +160,14 @@ bool tile_memory_manager::contains_tile (string tile) {
 }
 
 tile_memory_manager::~tile_memory_manager () {
-    map <string, SDL_Texture*>::iterator it;
+    map <string, texture*>::iterator it;
     for (it = this -> textures.begin (); it != this -> textures.end (); it++)
-        SDL_DestroyTexture (it -> second);
+        SDL_DestroyTexture (it -> second -> tx);
+}
+
+texture::texture (SDL_Texture* new_tx, coords* c_offset) {
+    this -> tx = new_tx;
+    this -> c_off = c_offset;
 }
 
 

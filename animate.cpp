@@ -1,8 +1,10 @@
 #include "animate.hpp"
 
 animation::animation (string ani_file) {
-    cout << ani_file.c_str () << endl;
-    ifstream f_ani (ani_file.c_str ());
+    string a_file = DATA2_PREFIX + convert_folder_path_to_unix (ani_file) +
+        ANIMATION_FILE_TYPE;
+    
+    ifstream f_ani (a_file.c_str ());
     
     int cursor = 0x0c;
     this -> num_frames = f_read_integer (&f_ani, cursor);
@@ -18,16 +20,22 @@ animation::animation (string ani_file) {
     char c;
     cursor += image_len;
     for (int i = 0; i < num_frames; i++) {
-        f_ani.seekg (cursor, ios::beg);
-        while ((c = f_ani.get ()) != 0x03);
-        cursor = (int)f_ani.tellg () + 5;
-        
-        int frameID = f_read_short_int (&f_ani, cursor);
-        int dur = f_read_short_int (&f_ani, cursor + 2);
+        cout << cursor << endl;
+        int frameID = f_read_short_int (&f_ani, cursor + 8);
+        int dur = f_read_short_int (&f_ani, cursor + 10);
         //~ cout << frameID << " " << dur << endl;
         this -> frames.push_back (frameID);
         this -> duration.push_back (dur);
-        cursor += 4;
+        f_ani.seekg (cursor, ios::beg);
+        c = f_ani.get ();
+        if ((c & 2) == 2) {
+            cursor += 20;
+            f_ani.seekg (cursor, ios::beg);
+            while ((c = f_ani.get ()) != 0);
+            cursor = f_ani.tellg ();
+        }
+        else
+            cursor += 20;
     }
     
     f_ani.close ();

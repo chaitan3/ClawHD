@@ -35,58 +35,49 @@ int main (int argc, char **argv)
     display disp;
     level l1 ("../Extracted/LEVEL1/WORLDS/WORLD.WWD");
     coords* start_state = l1.get_start_location ();
-    //~ animation anim ("../Extracted/CLAW/ANIS/STAND.ANI");
     kdtree <dynamic_tile*>* d_tiles = l1.get_dynamic_tiles ();
     dynamic_tile* d_claw = new dynamic_tile ("Captain Claw", CLAW, "CLAW_ANIS_STAND", start_state, 3000);
     d_tiles -> insert (d_claw);
-    string folder_images = DATA_PREFIX + convert_folder_path_to_unix (CLAW) + SEPARATOR;
-    l1.put_image_files (CLAW, folder_images);
+    l1.put_image_files (CLAW);
     
     coords *state = d_claw -> get_coords ();
-    
     SDL_Event event;
     int scroll_speed = 9;
     int latency = 10;
     
+    int i = 0;
     while (1) {
+        while (SDL_PollEvent (&event));
         const Uint8* key_state = SDL_GetKeyboardState (NULL);
-        if (key_state [SDL_SCANCODE_RIGHT]) {
-            state -> x += scroll_speed;
+        if (key_state [SDL_SCANCODE_ESCAPE])
+            exit (0);
+        else if (key_state [SDL_SCANCODE_LCTRL]) {
+            d_claw -> set_anim ("CLAW_ANIS_SWIPE");
         }
-        else if (key_state [SDL_SCANCODE_LEFT]) {
-            state -> x -= scroll_speed;
-        }
-        
-        while (SDL_PollEvent (&event)) {
-            switch (event.type) {
-                case SDL_KEYDOWN:
-                    switch (event.key.keysym.scancode) {
-                        case SDL_SCANCODE_RIGHT:
-                            d_claw -> mirrored = false;
-                            d_claw -> set_anim ("CLAW_ANIS_WALK");
-                            break;
-                        case SDL_SCANCODE_LEFT:
-                            d_claw -> mirrored = true;
-                            d_claw -> set_anim ("CLAW_ANIS_WALK");
-                            break;
-                        case SDL_SCANCODE_ESCAPE:
-                            exit (0);
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                case SDL_KEYUP:
-                    switch (event.key.keysym.scancode) {
-                        case SDL_SCANCODE_RIGHT:
-                        case SDL_SCANCODE_LEFT:
-                            d_claw -> set_anim ("CLAW_ANIS_STAND");
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
+        string anim = d_claw -> get_anim ();
+        if (anim == "CLAW_ANIS_STAND") {
+            if (key_state [SDL_SCANCODE_RIGHT]) {
+                d_claw -> mirrored = false;
+                d_claw -> set_anim ("CLAW_ANIS_WALK");
             }
+            else if (key_state [SDL_SCANCODE_LEFT]) {
+                d_claw -> mirrored = true;
+                d_claw -> set_anim ("CLAW_ANIS_WALK");
+            }
+        }
+        else if (anim == "CLAW_ANIS_WALK") {
+            if ((key_state [SDL_SCANCODE_RIGHT]) && !(d_claw -> mirrored)) {
+                d_tiles -> remove (d_claw);
+                state -> x += scroll_speed;
+                d_tiles -> insert (d_claw);
+            }
+            else if (key_state [SDL_SCANCODE_LEFT] && (d_claw -> mirrored)) {
+                d_tiles -> remove (d_claw);
+                state -> x -= scroll_speed;
+                d_tiles -> insert (d_claw);
+            }
+            else
+                d_claw -> set_anim ("CLAW_ANIS_STAND");
         }
         disp.render_screen (&l1, state);
         SDL_Delay (latency);
