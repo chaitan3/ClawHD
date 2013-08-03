@@ -12,12 +12,12 @@ class dynamic_tile {
     animation_state anim_state;
     
     public:
-    
+    string prev_anim;
+    bool mirrored;
     
     coords* get_coords ();
     int get_z ();
     animation_state* get_animation_state ();
-    bool get_mirrored_state ();
     dynamic_tile (string, string, string, coords*, int);
     bool x_compare (dynamic_tile*);
     bool y_compare (dynamic_tile*);

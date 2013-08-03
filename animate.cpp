@@ -1,7 +1,17 @@
 #include "animate.hpp"
 
-animation::animation (string ani_file) {
-    string a_file = DATA2_PREFIX + convert_folder_path_to_unix (ani_file) +
+animation::animation (string anim_file) {
+    string file = anim_file;
+    // REPEAT HACK
+    if (anim_file [0] == '!') {
+        this -> repeat = false;
+        file.erase (0, 1);
+        cout << file << endl;
+    }
+    else
+        this -> repeat = true;
+    
+    string a_file = DATA2_PREFIX + convert_folder_path_to_unix (file) +
         ANIMATION_FILE_TYPE;
     
     ifstream f_ani (a_file.c_str ());
@@ -20,7 +30,6 @@ animation::animation (string ani_file) {
     char c;
     cursor += image_len;
     for (int i = 0; i < num_frames; i++) {
-        cout << cursor << endl;
         int frameID = f_read_short_int (&f_ani, cursor + 8);
         int dur = f_read_short_int (&f_ani, cursor + 10);
         //~ cout << frameID << " " << dur << endl;
@@ -41,17 +50,25 @@ animation::animation (string ani_file) {
     f_ani.close ();
 }
 
-int animation::get_frame (int index) {
-    return this -> frames [index];
+int animation::get_next_frame (animation_state* anim_state) {
+    int curr_time = SDL_GetTicks ();
+    if (curr_time > anim_state -> last_update_time + this -> duration [anim_state -> frame]) {
+        (anim_state -> frame) ++;
+        if (anim_state -> frame >= this -> num_frames) {
+            if (this -> repeat)
+                anim_state -> frame = 0;
+            else
+                return -1;
+        }
+        anim_state -> last_update_time = curr_time;
+    }
+    return this -> frames [anim_state -> frame];
 }
 
-int animation::get_num_frames () {
-    return this -> num_frames;
+animation_state::animation_state () {
+    this -> reset ();
 }
-
-int animation::get_duration (int index) {
-    if (index < 0)
-        return 0;
-    return this -> duration [index];
+void animation_state::reset () {
+    this -> frame = -1;
+    this -> last_update_time = -0xFF;
 }
-    

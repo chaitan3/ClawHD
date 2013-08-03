@@ -1,9 +1,9 @@
 #include "level.hpp"
+#include "dtile.hpp"
 #include "miniz.h"
-#include <cstring>
 
 
-level::level (string filename) {
+level::level (string filename, memory_manager* mm) {
     ifstream f_wwd (filename.c_str(), ios::in | ios::binary);
     
     this -> num_planes = f_read_integer (&f_wwd, 0x8);
@@ -38,10 +38,9 @@ level::level (string filename) {
     
     // Get  compressed data
     char* inflated_data = this -> get_compressed_data (&f_wwd, offset, inflated_len);
-    char *ptr_end = inflated_data + inflated_len;
     
     // Get resolution of the 3 planes
-    char *ptr_data = inflated_data;
+    char* ptr_data = inflated_data;
     int width, height, tile_width, tile_height, x_move_speed, y_move_speed;
     for (int i = 0; i < this -> num_planes; i++) {
         ptr_data += 0x58;
@@ -71,11 +70,11 @@ level::level (string filename) {
     
     // Set folder names for each of the planes
     action_plane = planes [1];
-    this -> planes [0] -> folder_prefix = this -> folder_tiles + string ("/BACK/");
+    this -> planes [0] -> folder_prefix = this -> folder_tiles + string ("_BACK_");
     this -> planes [0] -> x_wrapping = true;
     this -> planes [0] -> y_wrapping = true;
-    this -> planes [1] -> folder_prefix = this -> folder_tiles + string ("/ACTION/");
-    this -> planes [2] -> folder_prefix = this -> folder_tiles + string ("/FRONT/");
+    this -> planes [1] -> folder_prefix = this -> folder_tiles + string ("_ACTION_");
+    this -> planes [2] -> folder_prefix = this -> folder_tiles + string ("_FRONT_");
     this -> planes [0] -> x_wrapping = true;
     
     // Start dynamic tiles
@@ -111,15 +110,16 @@ level::level (string filename) {
         key [len] = '\0';
         string folder_images = image_sources [key] + string ("_") + string (path);
         
+        // ARCHESFRONT HACK
         if (strcmp ("LEVEL_ARCHESFRONT", image) == 0)
             continue;
+            
         dynamic_tile* d_tile = new dynamic_tile (string (name), folder_images, string (anim), &c_pos, z);
         
-        if (this -> image_file_lists.count (folder_images) == 0) {
-            this -> put_image_files (folder_images);
-        }
-        this -> d_tiles.insert (d_tile);
+        mm -> put_image_files (folder_images);
+        mm -> insert_dynamic_tile (d_tile);
     }
+    delete[] inflated_data;
 }
 
 char* level::get_compressed_data (ifstream* file, int offset, int inflated_len) {
@@ -140,6 +140,12 @@ char* level::get_compressed_data (ifstream* file, int offset, int inflated_len) 
     
 }
 
+level::~level () {
+    for (int i = 0; i < this -> num_planes; i++) {
+        delete this -> planes [i];
+    }
+}
+
 int level::get_num_planes () {
     return this -> num_planes;
 }
@@ -154,26 +160,6 @@ plane* level::get_action_plane () {
 
 plane* level::get_plane (int i) {
     return this -> planes [i];
-}
-
-kdtree <dynamic_tile*>* level::get_dynamic_tiles () {
-    return &(this -> d_tiles);
-}
-
-animation* level::get_animation (string anim) {
-    if (this -> a_loaded.count (anim) == 0) {
-        animation* a_new = new animation (anim);
-        this -> a_loaded [anim] = a_new;
-    }
-    return this -> a_loaded [anim];
-}
-
-string level::get_default_image_file (string image) {
-    return this -> image_file_lists [image] -> at (0);
-}
-
-void level::put_image_files (string image) {
-    this -> image_file_lists [image] = get_directory_list (image);
 }
 
 char* plane::import_tile_ids (char *ptr) {
@@ -211,50 +197,10 @@ plane::plane (int t_w, int t_h, int w, int h, int x_ms, int y_ms) {
     this -> y_wrapping = false;
 }
 
-bool dynamic_tile::x_compare (dynamic_tile* right_operand) {
-    coords* c_right = right_operand -> get_coords ();
-    return this -> c_pos.x < c_right -> x;
-}
-
-bool dynamic_tile::y_compare (dynamic_tile* right_operand) {
-    coords* c_right = right_operand -> get_coords ();
-    return this -> c_pos.y < c_right -> y;
-}
-
-bool z_compare (dynamic_tile* left, dynamic_tile* right) {
-    return left -> get_z () < right -> get_z ();
-}
-
-string dynamic_tile::get_image () {
-    return this -> image;
-}
-
-string dynamic_tile::get_anim () {
-    return this -> anim;
-}
-
-void dynamic_tile::set_anim (string anim_new) {
-    this -> anim = anim_new;
-}
+plane::~plane () {
     
-
-int dynamic_tile::get_z () {
-    return this -> z;
+    for (int i = 0; i < this -> height; i++) {
+        delete[] this -> tiles [i];
+    }
+    delete[] this -> tiles;
 }
-
-coords* dynamic_tile::get_coords () {
-    return &(this -> c_pos);
-}
-
-dynamic_tile::dynamic_tile (string n, string i, string a, coords* c, int c_z) {
-    this -> name = n;
-    this -> image = i;
-    this -> anim = a;
-    this -> c_pos = *c;
-    this -> z = c_z;
-    
-    this -> frame = -1;
-    this -> last_update_time = -1;
-    this -> mirrored = false;
-}
-

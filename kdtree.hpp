@@ -19,6 +19,15 @@ template <class data_type>
 class kdtree {
     node<data_type>* root;
     
+    void free (node <data_type>* curr) {
+        if (curr == NULL)
+            return;
+        free (curr -> left);
+        free (curr -> right);
+        delete curr -> data;
+        delete curr;
+    }
+    
     void actual_insert (node <data_type>* new_node, node <data_type>* curr, int depth) {
         if (new_node == NULL)
             return;
@@ -137,7 +146,7 @@ class kdtree {
         else {
             *conn = NULL;
         }
-        //~ delete curr;
+        delete curr;
     }
     
     vector <data_type>* range_search (coords* c_top_left, coords* c_bottom_right) {
@@ -152,6 +161,10 @@ class kdtree {
     
     kdtree () {
         this -> root = NULL;
+    }
+    
+    ~kdtree () {
+        this -> free (this -> root);
     }
 };
         

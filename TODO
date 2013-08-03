@@ -1,17 +1,18 @@
 Bugs:
-    Fix offset
-    Powdered KEG Y U NO USE MID POINT
     Plane movement speed
     Read PID files directly
-    Check if string class takes too much memory in conversions
-    simplify constructur functions for classes
+    string memory management
+    function call without variable use?
     change name to logic
-Animations
+    
 Physics
+AI
+Sound
 Menu
 
-Portability
 Valgrind Memory checks
+Macros for offsets
+Portability
 LICENSE, README files
 More documentation
-Macros for offsets
+

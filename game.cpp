@@ -24,8 +24,20 @@ string memory_manager::get_default_image_file (string image) {
     return this -> image_file_lists [image] -> at (0);
 }
 
+
 void memory_manager::put_image_files (string image) {
     if (this -> image_file_lists.count (image) == 0)
         this -> image_file_lists [image] = get_directory_list (image);
 }
 
+memory_manager::~memory_manager () {
+    map <string, vector <string>*>::iterator file_list;
+    for (file_list = this -> image_file_lists.begin (); file_list != this -> image_file_lists.end (); file_list++) {
+        delete file_list -> second;
+    }
+    
+    map <string, animation*>::iterator a_curr;
+    for (a_curr = this -> a_loaded.begin (); a_curr != this -> a_loaded.end (); a_curr++) {
+        delete a_curr -> second;
+    }
+}

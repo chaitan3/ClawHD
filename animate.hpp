@@ -4,18 +4,28 @@
 
 #define ANIMATION_FILE_TYPE string (".ANI")
 
+class animation_state {
+    public:
+    int frame;
+    int last_update_time;
+    
+    animation_state ();
+    void reset ();
+};
+
+
 class animation {
     string image;
     int num_frames;
     vector <int> frames;
     vector <int> duration;
+    bool repeat;
     
     public:
     animation (string);
-    int get_num_frames ();
-    int get_frame (int);
-    int get_duration (int);
+    int get_next_frame (animation_state*);
 };
+
 
 
 #endif

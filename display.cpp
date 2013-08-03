@@ -1,6 +1,6 @@
 #include "display.hpp"
+#include "dtile.hpp"
 #include <SDL2/SDL_image.h>
-#include <algorithm>
 
 display::display() {
     this -> height = 600;
@@ -43,9 +43,13 @@ int display::copy_tile_to_display (string tile, coords* c_pos, bool mirrored) {
     src.h = height;
     dest.w = width;
     dest.h = height;
-    dest.x = c_pos -> x + t_curr -> c_off -> x;
-    dest.y = c_pos -> y + t_curr -> c_off -> y;
-    
+    if (mirrored) {
+        dest.x = c_pos -> x - width / 2 - t_curr -> c_off -> x;
+    }
+    else {
+        dest.x = c_pos -> x - width / 2 + t_curr -> c_off -> x;
+    }
+    dest.y = c_pos -> y - height / 2 + t_curr -> c_off -> y;
     SDL_RendererFlip flip = SDL_FLIP_NONE;
     if (mirrored)
         flip = SDL_FLIP_HORIZONTAL;
@@ -59,6 +63,10 @@ int display::copy_tile_to_display (string tile, coords* c_pos, bool mirrored) {
 
 void display::import_tile_texture (string file) {
     string t_file = DATA_PREFIX + convert_folder_path_to_unix (file) + TEXTURE_FILE_TYPE;
+    // LEVEL1 ACTION 074 HACK
+    if (!f_exists (t_file)) 
+        t_file.erase (remove (t_file.begin (), t_file.end (), '0'), t_file.end ());
+        
     SDL_Surface* surface = IMG_Load (t_file.c_str ());
     if (surface == NULL) {
         cout << "Failed to load surface: " << file << endl;
@@ -70,13 +78,16 @@ void display::import_tile_texture (string file) {
         exit(1);
     }
     coords* c_off = get_offset_from_pid (file);
+    cout << file << endl;
+    cout << c_off -> x << endl;
+    cout << c_off -> y << endl;
     this -> tmm.put_tile_texture (file, new texture (tx, c_off));
     
     SDL_FreeSurface (surface);
 }
 
-void display::render_screen (level* l_current, coords* c_pos) {
-    kdtree <dynamic_tile*>* dynamic_tiles = l_current -> get_dynamic_tiles ();
+void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos) {
+    kdtree <dynamic_tile*>* dynamic_tiles = mm -> get_dynamic_tiles ();
     
     coords c_draw_pos;
     int i, j, i_start, j_start;
@@ -94,16 +105,13 @@ void display::render_screen (level* l_current, coords* c_pos) {
         int num_h_tiles =  p_curr -> get_height ();
         i_start = top / TILE_SIZE;
         j_start = left / TILE_SIZE;
-        for (i = i_start, c_draw_pos.y = i_start * TILE_SIZE - top; c_draw_pos.y < this -> height; i++, c_draw_pos.y += TILE_SIZE) {
-            for (j = j_start, c_draw_pos.x = j_start * TILE_SIZE - left; c_draw_pos.x < this -> width; j++, c_draw_pos.x += TILE_SIZE) {
+        for (i = i_start, c_draw_pos.y = i_start * TILE_SIZE - top + TILE_SIZE / 2; c_draw_pos.y < this -> height + TILE_SIZE / 2; i++, c_draw_pos.y += TILE_SIZE) {
+            for (j = j_start, c_draw_pos.x = j_start * TILE_SIZE - left + TILE_SIZE / 2; c_draw_pos.x < this -> width + TILE_SIZE / 2; j++, c_draw_pos.x += TILE_SIZE) {
                 
                 int tileID = tiles [i % num_h_tiles][j % num_w_tiles];
                 if (tileID >= 0) {
                     string tile = p_curr -> folder_prefix +
                     convert_to_three_digits (tileID);
-                    //~ if (!f_exists (tile))
-                        //~ tile = p_curr -> folder_prefix + 
-                        //~ convert_int_to_string (tileID);
                     this -> copy_tile_to_display (tile, &c_draw_pos, false);
                 }
             }
@@ -121,29 +129,34 @@ void display::render_screen (level* l_current, coords* c_pos) {
         coords* c_tile_pos = d_tile -> get_coords ();
         
         string tile;
-        string anim = d_tile -> get_anim ();
-        string image = d_tile -> get_image ();
-        if ((anim.length () > 0) && (anim [0] == 'C')) {
-            int frame = 0;
-            animation* a_curr = l_current -> get_animation (anim);
+        while (1) {
+            string anim = d_tile -> get_anim ();
+            string image = d_tile -> get_image ();
             
-            int curr_time = SDL_GetTicks ();
-            if (curr_time > d_tile -> last_update_time + a_curr -> get_duration (d_tile -> frame)) {
-                (d_tile -> frame) ++;
-                if (d_tile -> frame == a_curr -> get_num_frames ())
-                    d_tile -> frame = 0;
-                d_tile -> last_update_time = curr_time;
+            // ONLY CLAW ANIMATION HACK
+            if ((anim.length () > 0) && ((anim [0] == 'C') || (anim [0] == '!'))) {
+                animation* a_curr = mm -> get_animation (anim);
+                int frame = a_curr -> get_next_frame (d_tile -> get_animation_state ());
+                if (frame == -1) {
+                    d_tile -> set_anim (d_tile -> prev_anim);
+                }
+                else {
+                    tile = image + string ("_FRAME") +  convert_to_three_digits (frame);
+                    break;
+                }
+                
             }
-            frame = a_curr -> get_frame (d_tile -> frame);
-            tile = image + string ("_FRAME") + convert_to_three_digits (frame);
-        }
-        else {
-            tile = l_current -> get_default_image_file (image);
+            else {
+                tile = mm -> get_default_image_file (image);
+                break;
+            }
         }
         c_draw_pos.x = c_tile_pos -> x - left;
         c_draw_pos.y = c_tile_pos -> y - top;
         this -> copy_tile_to_display (tile, &c_draw_pos, d_tile -> mirrored);
     }
+    delete interior_elements;
+    
     SDL_RenderPresent(this -> renderer);
 }
 
@@ -161,8 +174,11 @@ bool tile_memory_manager::contains_tile (string tile) {
 
 tile_memory_manager::~tile_memory_manager () {
     map <string, texture*>::iterator it;
-    for (it = this -> textures.begin (); it != this -> textures.end (); it++)
+    for (it = this -> textures.begin (); it != this -> textures.end (); it++) {
         SDL_DestroyTexture (it -> second -> tx);
+        delete it -> second -> c_off;
+        delete it -> second;
+    }
 }
 
 texture::texture (SDL_Texture* new_tx, coords* c_offset) {

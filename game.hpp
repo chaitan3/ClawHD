@@ -20,6 +20,8 @@ class memory_manager {
     
     string get_default_image_file (string);
     void put_image_files (string);
+    
+    ~memory_manager ();
 };
 
 #endif

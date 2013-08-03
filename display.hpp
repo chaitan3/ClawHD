@@ -1,9 +1,8 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
-#include <SDL2/SDL.h>
 #include "util.hpp"
 #include "level.hpp"
-#include "kdtree.hpp"
+#include "game.hpp"
 
 #define TILE_SIZE 64
 #define RENDERER_PADDING 50
@@ -38,7 +37,7 @@ class display {
     int copy_tile_to_display (string, coords*, bool);
 
     public:
-    void render_screen (level*, coords*);
+    void render_screen (memory_manager* , level*, coords*);
     display ();
     ~display ();
 };

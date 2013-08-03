@@ -1,8 +1,6 @@
 
 #include "util.hpp"
-#include <cstring>
 #include <sstream>
-#include <algorithm>
 #include <sys/stat.h>
 #include <dirent.h>
 
@@ -24,7 +22,9 @@ string f_read_path (ifstream *file, int offset, int length) {
     char* buffer = new char [length];
     file -> seekg (offset, ios::beg);
     file -> read (buffer, length);
-    return string (buffer);
+    string str = string (buffer);
+    delete[] buffer;
+    return str;
 }
 
 string convert_to_three_digits (int number) {
@@ -54,11 +54,10 @@ bool f_exists (string name) {
 
 vector <string>* get_directory_list (string dir) {
     string read_dir = DATA_PREFIX + convert_folder_path_to_unix (dir);
-    cout << read_dir << endl;
     vector <string>* list_dir = new vector <string>;
     DIR* ptr_dir = opendir (read_dir.c_str ());
+    
     struct dirent* file_dir;
-    cout << read_dir << endl;
     
     if (ptr_dir != NULL) {
         while ((file_dir = readdir (ptr_dir)) != NULL) {
@@ -77,6 +76,11 @@ vector <string>* get_directory_list (string dir) {
 string convert_folder_path_to_unix (string str) {
     replace (str.begin (), str.end (), '\\', '/');
     replace (str.begin (), str.end (), '_', '/');
+    // ARROWSIGN HACK
+    string arrow = "ARROWSIGN/";
+    int i = str.find (arrow);
+    if (i >= 0) 
+        str [i + 9] = '_';
     return str;
 }
 
@@ -84,13 +88,12 @@ string convert_folder_path_to_unix (string str) {
 coords* get_offset_from_pid (string tile) {
     coords* c_off = new coords ();
     string p_tile = DATA2_PREFIX + convert_folder_path_to_unix (tile) + string (".PID");
-    cout << p_tile << endl;
     ifstream f_pid (p_tile.c_str ());
-    c_off -> x = f_read_integer (&f_pid, 0);
-    cout << c_off -> x << endl;
-    c_off -> y = f_read_integer (&f_pid, 4);
-    cout << c_off -> y << endl;
-    return new coords ();
+    if (f_pid.is_open ()) {
+        c_off -> x = f_read_integer (&f_pid, 16);
+        c_off -> y = f_read_integer (&f_pid, 20);
+    }
+    return c_off;
 }
 coords::coords () {
     this -> x = 0;

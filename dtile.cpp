@@ -23,6 +23,7 @@ string dynamic_tile::get_anim () {
 }
 
 void dynamic_tile::set_anim (string anim_new) {
+    this -> anim_state.reset ();
     this -> anim = anim_new;
 }
     
@@ -42,13 +43,10 @@ dynamic_tile::dynamic_tile (string n, string i, string a, coords* c, int c_z) {
     this -> c_pos = *c;
     this -> z = c_z;
     
+    this -> mirrored = false;
 }
 
 animation_state* dynamic_tile::get_animation_state () {
     return & (this -> anim_state);
-}
-
-bool dynamic_tile::get_mirrored_state () {
-    return this -> anim_state.mirrored;
 }
 

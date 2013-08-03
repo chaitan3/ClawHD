@@ -5,8 +5,11 @@
 #include <string>
 #include <fstream>
 #include <stdint.h>
+#include <cstring>
 #include <vector>
 #include <map>
+#include <algorithm>
+#include <SDL2/SDL.h>
 
 //PID HACK
 #define DATA_PREFIX string ("../Images/")

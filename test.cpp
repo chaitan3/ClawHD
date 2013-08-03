@@ -21,40 +21,52 @@
  * 
  */
 
-#include "level.hpp"
-#include "animate.hpp"
-#include "kdtree.hpp"
 #include "util.hpp"
+#include "level.hpp"
+#include "game.hpp"
 #include "display.hpp"
-#include <SDL2/SDL.h>
 
 #define CLAW "CLAW_IMAGES"
 
 int main (int argc, char **argv)
 {   
     display disp;
-    level l1 ("../Extracted/LEVEL1/WORLDS/WORLD.WWD");
+    memory_manager mm;
+    level l1 ("../Extracted/LEVEL1/WORLDS/WORLD.WWD", &mm);
     coords* start_state = l1.get_start_location ();
-    kdtree <dynamic_tile*>* d_tiles = l1.get_dynamic_tiles ();
     dynamic_tile* d_claw = new dynamic_tile ("Captain Claw", CLAW, "CLAW_ANIS_STAND", start_state, 3000);
-    d_tiles -> insert (d_claw);
-    l1.put_image_files (CLAW);
+    mm.insert_dynamic_tile (d_claw);
+    mm.put_image_files (CLAW);
     
-    coords *state = d_claw -> get_coords ();
+    coords* state = d_claw -> get_coords ();
     SDL_Event event;
     int scroll_speed = 9;
     int latency = 10;
+    int count;
+    const uint8_t* key_state;
+    const uint8_t* prev_key_state = NULL;
     
-    int i = 0;
     while (1) {
         while (SDL_PollEvent (&event));
-        const Uint8* key_state = SDL_GetKeyboardState (NULL);
+        key_state = SDL_GetKeyboardState (&count);
+        
+        string anim = d_claw -> get_anim ();
+        
         if (key_state [SDL_SCANCODE_ESCAPE])
             exit (0);
         else if (key_state [SDL_SCANCODE_LCTRL]) {
-            d_claw -> set_anim ("CLAW_ANIS_SWIPE");
+            if ((!prev_key_state [SDL_SCANCODE_LCTRL]) && (anim [0] != '!')) {
+                d_claw -> prev_anim = anim;
+                d_claw -> set_anim ("!CLAW_ANIS_SWIPE");
+            }
         }
-        string anim = d_claw -> get_anim ();
+        else if (key_state [SDL_SCANCODE_LALT]) {
+            if ((!prev_key_state [SDL_SCANCODE_LALT]) && (anim [0] != '!')) {
+                d_claw -> prev_anim = anim;
+                d_claw -> set_anim ("!CLAW_ANIS_PISTOL");
+            }
+        }
+        
         if (anim == "CLAW_ANIS_STAND") {
             if (key_state [SDL_SCANCODE_RIGHT]) {
                 d_claw -> mirrored = false;
@@ -64,25 +76,34 @@ int main (int argc, char **argv)
                 d_claw -> mirrored = true;
                 d_claw -> set_anim ("CLAW_ANIS_WALK");
             }
+            
         }
         else if (anim == "CLAW_ANIS_WALK") {
             if ((key_state [SDL_SCANCODE_RIGHT]) && !(d_claw -> mirrored)) {
-                d_tiles -> remove (d_claw);
+                mm.remove_dynamic_tile (d_claw);
                 state -> x += scroll_speed;
-                d_tiles -> insert (d_claw);
+                mm.insert_dynamic_tile (d_claw);
             }
             else if (key_state [SDL_SCANCODE_LEFT] && (d_claw -> mirrored)) {
-                d_tiles -> remove (d_claw);
+                mm.remove_dynamic_tile (d_claw);
                 state -> x -= scroll_speed;
-                d_tiles -> insert (d_claw);
+                mm.insert_dynamic_tile (d_claw);
+            }
+            else if (key_state [SDL_SCANCODE_LCTRL]) {
+                d_claw -> prev_anim = anim;
+                d_claw -> set_anim ("!CLAW_ANIS_SWIPE");
             }
             else
                 d_claw -> set_anim ("CLAW_ANIS_STAND");
         }
-        disp.render_screen (&l1, state);
+        disp.render_screen (&mm, &l1, state);
         SDL_Delay (latency);
+        
+        prev_key_state = new uint8_t [count];
+        memcpy ((void *)prev_key_state, key_state, count);
     }
     
+    delete prev_key_state;
     return 0;
 }
 
