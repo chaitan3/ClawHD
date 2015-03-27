@@ -25,7 +25,10 @@ animation* memory_manager::get_animation (string anim) {
 }
 
 string memory_manager::get_default_image (string image) {
-    return this -> image_list [image] -> at (0);
+    if (this -> image_list.count (image) == 0)
+        return image;
+    else
+        return this -> image_list [image] -> at (0);
 }
 
 

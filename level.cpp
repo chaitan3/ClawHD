@@ -41,7 +41,8 @@ level::level (string filename, memory_manager* mm) {
     
     // Get resolution of the 3 planes
     char* ptr_data = inflated_data;
-    int width, height, tile_width, tile_height, x_move_speed, y_move_speed;
+    int width, height, tile_width, tile_height, x_move_speed, y_move_speed, fill_color;
+    int32_t c_z;
     for (int i = 0; i < this -> num_planes; i++) {
         ptr_data += 0x58;
         memcpy (&tile_width, ptr_data, 4);
@@ -52,15 +53,25 @@ level::level (string filename, memory_manager* mm) {
         ptr_data += 0x4;
         memcpy (&height, ptr_data, 4);
         ptr_data += 0x0c;
+        
+
         memcpy (&x_move_speed, ptr_data, 4);
         ptr_data += 0x04;
         memcpy (&y_move_speed, ptr_data, 4);
-        ptr_data += 0x0c;
+        ptr_data += 0x04;
+
+        memcpy (&fill_color, ptr_data, 4);
+        ptr_data += 0x08;
+
         if (i == 1)
             memcpy (&(this -> num_objects), ptr_data, 4);
-        ptr_data += 0x20;
-        
-        plane* p = new plane (tile_width, tile_height, width, height, x_move_speed, y_move_speed);
+
+        ptr_data += 0x10;
+        memcpy (&c_z, ptr_data, 4);
+        ptr_data += 0x10;
+
+        cout << i << " " << fill_color << " " << c_z << endl;
+        plane* p = new plane (tile_width, tile_height, width, height, x_move_speed, y_move_speed, fill_color, c_z);
         this -> planes.push_back (p);
     }
     // Copy tile IDs for each plane
@@ -75,7 +86,7 @@ level::level (string filename, memory_manager* mm) {
     this -> planes [0] -> y_wrapping = true;
     this -> planes [1] -> folder_prefix = this -> folder_tiles + string ("_ACTION_");
     this -> planes [2] -> folder_prefix = this -> folder_tiles + string ("_FRONT_");
-    this -> planes [0] -> x_wrapping = true;
+    this -> planes [2] -> x_wrapping = true;
     
     // Start dynamic tiles
     ptr_data += 0x1A;
@@ -116,9 +127,6 @@ level::level (string filename, memory_manager* mm) {
         
         string sname(name);
         string sanim(anim);
-        if (sname == "GlitterlessPowerup") {
-            sanim = "GAME_ANIS_GLITTER1";
-        }
         dynamic_tile* d_tile = new dynamic_tile (sname, folder_images, sanim, &c_pos, z);
         mm -> load_image_list (folder_images);
         mm -> insert_dynamic_tile (d_tile);
@@ -179,6 +187,9 @@ char* plane::import_tile_ids (char *ptr) {
     return ptr + this -> height * this -> width * 4;
 }
 
+int plane::get_z () {
+    return this -> c_z;
+}
 int plane::get_width () {
     return this -> width;
 }
@@ -190,7 +201,7 @@ int32_t** plane::get_tile_ids () {
     return this -> tiles;
 }
 
-plane::plane (int t_w, int t_h, int w, int h, int x_ms, int y_ms) {
+plane::plane (int t_w, int t_h, int w, int h, int x_ms, int y_ms, int f_c, int32_t c_z) {
     this -> height = h;
     this -> width = w;
     this -> tile_height = t_h;
@@ -199,6 +210,8 @@ plane::plane (int t_w, int t_h, int w, int h, int x_ms, int y_ms) {
     this -> y_move_speed = y_ms;
     this -> x_wrapping = false;
     this -> y_wrapping = false;
+    this -> fill_color = f_c;
+    this -> c_z = c_z;
 }
 
 plane::~plane () {

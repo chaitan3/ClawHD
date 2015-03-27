@@ -90,8 +90,11 @@ void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos
     int i, j, i_start, j_start;
     int top = c_pos -> y - this -> height / 2;
     int left = c_pos -> x - this -> width / 2;
-    
-    SDL_RenderClear (renderer);
+
+    coords c_top_left (left - RENDERER_PADDING, top - RENDERER_PADDING);
+    coords c_bottom_right (left + this -> width + RENDERER_PADDING, top + this -> height + RENDERER_PADDING);
+    vector <dynamic_tile*>* interior_tiles = dynamic_tiles -> range_search (&c_top_left, &c_bottom_right);
+    vector <dynamic_tile*> static_tiles;
     
     // Assume Claw at center of screen
     // Render static tiles
@@ -102,28 +105,27 @@ void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos
         int num_h_tiles =  p_curr -> get_height ();
         i_start = top / TILE_SIZE;
         j_start = left / TILE_SIZE;
-        for (i = i_start, c_draw_pos.y = i_start * TILE_SIZE - top + TILE_SIZE / 2; c_draw_pos.y < this -> height + TILE_SIZE / 2; i++, c_draw_pos.y += TILE_SIZE) {
-            for (j = j_start, c_draw_pos.x = j_start * TILE_SIZE - left + TILE_SIZE / 2; c_draw_pos.x < this -> width + TILE_SIZE / 2; j++, c_draw_pos.x += TILE_SIZE) {
-                
+        cout << k << p_curr -> get_z() << endl;
+        for (i = i_start, c_draw_pos.y = i_start * TILE_SIZE + TILE_SIZE / 2; c_draw_pos.y < this -> height + top + TILE_SIZE / 2; i++, c_draw_pos.y += TILE_SIZE) {
+            for (j = j_start, c_draw_pos.x = j_start * TILE_SIZE + TILE_SIZE / 2; c_draw_pos.x < this -> width + left + TILE_SIZE / 2; j++, c_draw_pos.x += TILE_SIZE) {
                 int tileID = tiles [i % num_h_tiles][j % num_w_tiles];
                 if (tileID >= 0) {
-                    string tile = p_curr -> folder_prefix +
-                    convert_to_three_digits (tileID);
-                    this -> copy_tile_to_display (tile, &c_draw_pos, false);
+                    string tile = p_curr -> folder_prefix + convert_to_three_digits (tileID);
+                    dynamic_tile* static_tile = new dynamic_tile(tile, &c_draw_pos, p_curr -> get_z ());
+                    static_tiles.push_back (static_tile);
+                    interior_tiles -> push_back (static_tile);
                 }
             }
         }
     }
     // Render Dynamic Tiles
-    coords c_top_left (left - RENDERER_PADDING, top - RENDERER_PADDING);
-    coords c_bottom_right (left + this -> width + RENDERER_PADDING, top + this -> height + RENDERER_PADDING);
-    vector <dynamic_tile*>* interior_elements = dynamic_tiles -> range_search (&c_top_left, &c_bottom_right);
-    sort (interior_elements -> begin (), interior_elements -> end (), z_compare);
+    sort (interior_tiles -> begin (), interior_tiles -> end (), z_compare);
     
     vector <dynamic_tile*>::iterator it;
     int num_d_tiles = 0;
+    SDL_RenderClear (renderer);
 
-    for (it = interior_elements -> begin (); it != interior_elements -> end (); it++) {
+    for (it = interior_tiles -> begin (); it != interior_tiles -> end (); it++) {
         dynamic_tile* d_tile = *it;
         coords* c_tile_pos = d_tile -> get_coords ();
         
@@ -132,7 +134,7 @@ void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos
         string image = d_tile -> get_image ();
             
         animation* a_curr = mm -> get_animation (anim);
-        //cout << d_tile -> get_name () << " " << image << " " << anim << endl;
+        //cout << "display " << d_tile -> get_name () << " " << image << " " << anim << endl;
         if (a_curr != NULL) {
             int frame = a_curr -> get_next_frame (d_tile -> get_animation_state ());
             if (frame == -1) {
@@ -152,7 +154,9 @@ void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos
         this -> copy_tile_to_display (tile, &c_draw_pos, d_tile -> mirrored);
         num_d_tiles ++;
     }
-    delete interior_elements;
+    delete interior_tiles;
+    for (it = static_tiles.begin(); it != static_tiles.end(); it++)
+        delete *it;
     
     SDL_RenderPresent(this -> renderer);
 }

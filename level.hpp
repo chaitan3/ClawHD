@@ -9,6 +9,8 @@ class plane {
     int32_t **tiles;
     int tile_width, tile_height;
     int x_move_speed, y_move_speed;
+    int fill_color;
+    int32_t c_z;
     
     public:
     string folder_prefix;
@@ -18,7 +20,8 @@ class plane {
     int32_t** get_tile_ids ();
     int get_width ();
     int get_height ();
-    plane (int, int, int, int, int, int);
+    int get_z();
+    plane (int, int, int, int, int, int, int, int32_t);
     ~plane ();
     
 };

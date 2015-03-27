@@ -12,8 +12,8 @@
 #include <SDL2/SDL.h>
 
 //PID HACK
-#define DATA_PREFIX string ("../Images/")
-#define DATA2_PREFIX string ("../Extracted/")
+#define DATA_PREFIX string ("images/")
+#define DATA2_PREFIX string ("rez/")
 
 #define SEPARATOR string ("/")
 

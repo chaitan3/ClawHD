@@ -49,14 +49,26 @@ coords* dynamic_tile::get_coords () {
     return &(this -> c_pos);
 }
 
-dynamic_tile::dynamic_tile (string n, string i, string a, coords* c, int c_z) {
-    this -> name = n;
-    this -> image = i;
-    this -> anim = a;
-    this -> prev_anim = a;
+dynamic_tile::dynamic_tile (string name, string image, string anim, coords* c, int c_z) {
+    if (name == "GlitterlessPowerup") {
+        anim = "GAME_ANIS_GLITTER1";
+    } else if (name == "TreasurePowerup") {
+        //anim = "GAME_ANIS_GLITTER2";
+    }
+ 
+    this -> name = name;
+    this -> image = image;
+    this -> anim = anim;
+    this -> prev_anim = anim;
     this -> c_pos = *c;
     this -> z = c_z;
-    
+    this -> mirrored = false;
+}
+
+dynamic_tile::dynamic_tile (string image, coords *c, int c_z) {
+    this -> z = c_z;
+    this -> c_pos = *c;
+    this -> image = image;
     this -> mirrored = false;
 }
 

@@ -32,15 +32,15 @@ int main (int argc, char **argv)
 {   
     display disp;
     memory_manager mm;
-    level level ("../Extracted/LEVEL14/WORLDS/WORLD.WWD", &mm);
-    coords* start_state = level.get_start_location ();
+    level l_curr (DATA2_PREFIX + "LEVEL14/WORLDS/WORLD.WWD", &mm);
+    coords* start_state = l_curr.get_start_location ();
     dynamic_tile* d_claw = new dynamic_tile ("Captain Claw", CLAW, "CLAW_ANIS_STAND", start_state, 100000);
     mm.insert_dynamic_tile (d_claw);
     mm.load_image_list (CLAW);
     
     coords* state = d_claw -> get_coords ();
     SDL_Event event;
-    int scroll_speed = 9;
+    int scroll_speed = 7;
     int latency = 10;
     int count;
     const uint8_t* key_state;
@@ -49,22 +49,22 @@ int main (int argc, char **argv)
     while (1) {
         while (SDL_PollEvent (&event));
         key_state = SDL_GetKeyboardState (&count);
-        
-        string anim = d_claw -> get_anim ();
-        
         if (key_state [SDL_SCANCODE_ESCAPE])
             exit (0);
-        else if (key_state [SDL_SCANCODE_LCTRL]) {
-            if (!prev_key_state [SDL_SCANCODE_LCTRL]) {
-                d_claw -> set_anim ("CLAW_ANIS_SWIPE");
-            }
-        }
-        else if (key_state [SDL_SCANCODE_LALT]) {
-            if (!prev_key_state [SDL_SCANCODE_LALT]) {
-                d_claw -> set_anim ("CLAW_ANIS_PISTOL");
-            }
-        }
         
+        string anim = d_claw -> get_anim ();
+        if (anim != "CLAW_ANIS_SWIPE" && anim != "CLAW_ANIS_PISTOL") {
+            if (key_state [SDL_SCANCODE_LCTRL]) {
+                if (anim != "CLAW_ANIS_SWIPE") {
+                    d_claw -> set_anim ("CLAW_ANIS_SWIPE");
+                }
+            }
+            else if (key_state [SDL_SCANCODE_LALT]) {
+                if (anim != "CLAW_ANIS_PISTOL") {
+                    d_claw -> set_anim ("CLAW_ANIS_PISTOL");
+                }
+            }
+        }
         if (anim == "CLAW_ANIS_STAND") {
             if (key_state [SDL_SCANCODE_RIGHT]) {
                 d_claw -> mirrored = false;
@@ -90,7 +90,7 @@ int main (int argc, char **argv)
             else
                 d_claw -> reset_anim ("CLAW_ANIS_STAND");
         }
-        disp.render_screen (&mm, &level, state);
+        disp.render_screen (&mm, &l_curr, state);
         SDL_Delay (latency);
         
         prev_key_state = new uint8_t [count];

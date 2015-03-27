@@ -19,6 +19,7 @@ class dynamic_tile {
     int get_z ();
     animation_state* get_animation_state ();
     dynamic_tile (string, string, string, coords*, int);
+    dynamic_tile (string, coords*, int);
     bool x_compare (dynamic_tile*);
     bool y_compare (dynamic_tile*);
     string get_image ();
