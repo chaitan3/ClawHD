@@ -19,7 +19,6 @@ class animation {
     int num_frames;
     vector <int> frames;
     vector <int> duration;
-    bool repeat;
     
     public:
     animation (string);

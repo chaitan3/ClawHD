@@ -77,9 +77,7 @@ void display::import_tile_texture (string file) {
         exit(1);
     }
     coords* c_off = get_offset_from_pid (file);
-    cout << file << endl;
-    cout << c_off -> x << endl;
-    cout << c_off -> y << endl;
+    cout << "texture " << file << " " << c_off -> x << " " << c_off -> y << endl;
     this -> tmm.put_tile_texture (file, new texture (tx, c_off));
     
     SDL_FreeSurface (surface);
@@ -123,36 +121,36 @@ void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos
     sort (interior_elements -> begin (), interior_elements -> end (), z_compare);
     
     vector <dynamic_tile*>::iterator it;
+    int num_d_tiles = 0;
+
     for (it = interior_elements -> begin (); it != interior_elements -> end (); it++) {
         dynamic_tile* d_tile = *it;
         coords* c_tile_pos = d_tile -> get_coords ();
         
         string tile;
-        while (1) {
-            string anim = d_tile -> get_anim ();
-            string image = d_tile -> get_image ();
+        string anim = d_tile -> get_anim ();
+        string image = d_tile -> get_image ();
             
-            // ONLY CLAW ANIMATION HACK
-            if ((anim.length () > 0) && ((anim [0] == 'C') || (anim [0] == '!'))) {
-                animation* a_curr = mm -> get_animation (anim);
-                int frame = a_curr -> get_next_frame (d_tile -> get_animation_state ());
-                if (frame == -1) {
-                    d_tile -> set_anim (d_tile -> prev_anim);
-                }
-                else {
-                    tile = image + string ("_FRAME") +  convert_to_three_digits (frame);
-                    break;
-                }
-                
+        animation* a_curr = mm -> get_animation (anim);
+        //cout << d_tile -> get_name () << " " << image << " " << anim << endl;
+        if (a_curr != NULL) {
+            int frame = a_curr -> get_next_frame (d_tile -> get_animation_state ());
+            if (frame == -1) {
+                d_tile -> reset_anim (d_tile -> get_prev_anim());
+                it--; continue;
             }
             else {
-                tile = mm -> get_default_image_file (image);
-                break;
+                tile = image + string ("_FRAME") +  convert_to_three_digits (frame);
             }
+            
+        }
+        else {
+            tile = mm -> get_default_image (image);
         }
         c_draw_pos.x = c_tile_pos -> x - left;
         c_draw_pos.y = c_tile_pos -> y - top;
         this -> copy_tile_to_display (tile, &c_draw_pos, d_tile -> mirrored);
+        num_d_tiles ++;
     }
     delete interior_elements;
     

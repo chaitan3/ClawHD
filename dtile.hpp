@@ -7,12 +7,12 @@ class dynamic_tile {
     string name;
     string image;
     string anim;
+    string prev_anim;
     coords c_pos;
     int z;
     animation_state anim_state;
     
     public:
-    string prev_anim;
     bool mirrored;
     
     coords* get_coords ();
@@ -22,8 +22,11 @@ class dynamic_tile {
     bool x_compare (dynamic_tile*);
     bool y_compare (dynamic_tile*);
     string get_image ();
+    string get_name ();
     string get_anim ();
+    string get_prev_anim ();
     void set_anim (string);
+    void reset_anim (string);
     dynamic_tile () {};
 };
 

@@ -8,8 +8,8 @@
 
 class memory_manager {
     kdtree <dynamic_tile*> d_tiles;
-    map <string, vector <string>*> image_file_lists;
-    map <string, animation*> a_loaded;
+    map <string, vector <string>*> image_list;
+    map <string, animation*> animations;
     
     public:
     void insert_dynamic_tile (dynamic_tile*);
@@ -18,8 +18,8 @@ class memory_manager {
     
     animation* get_animation (string);
     
-    string get_default_image_file (string);
-    void put_image_files (string);
+    string get_default_image (string);
+    void load_image_list (string);
     
     ~memory_manager ();
 };

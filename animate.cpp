@@ -2,15 +2,6 @@
 
 animation::animation (string anim_file) {
     string file = anim_file;
-    // REPEAT HACK
-    if (anim_file [0] == '!') {
-        this -> repeat = false;
-        file.erase (0, 1);
-        cout << file << endl;
-    }
-    else
-        this -> repeat = true;
-    
     string a_file = DATA2_PREFIX + convert_folder_path_to_unix (file) +
         ANIMATION_FILE_TYPE;
     
@@ -55,10 +46,7 @@ int animation::get_next_frame (animation_state* anim_state) {
     if (curr_time > anim_state -> last_update_time + this -> duration [anim_state -> frame]) {
         (anim_state -> frame) ++;
         if (anim_state -> frame >= this -> num_frames) {
-            if (this -> repeat)
-                anim_state -> frame = 0;
-            else
-                return -1;
+            return -1;
         }
         anim_state -> last_update_time = curr_time;
     }

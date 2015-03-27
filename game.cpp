@@ -13,31 +13,35 @@ kdtree <dynamic_tile*>* memory_manager::get_dynamic_tiles () {
 }
 
 animation* memory_manager::get_animation (string anim) {
-    if (this -> a_loaded.count (anim) == 0) {
-        animation* a_new = new animation (anim);
-        this -> a_loaded [anim] = a_new;
+    if (anim.length() == 0)
+        return NULL;
+    if ((anim.find("GAME_SOUND") == 0) || (anim.find("LEVEL") == 0)) {
+        return NULL;
     }
-    return this -> a_loaded [anim];
+    if (this -> animations.count (anim) == 0) {
+        this -> animations [anim] = new animation (anim);
+    }
+    return this -> animations [anim];
 }
 
-string memory_manager::get_default_image_file (string image) {
-    return this -> image_file_lists [image] -> at (0);
+string memory_manager::get_default_image (string image) {
+    return this -> image_list [image] -> at (0);
 }
 
 
-void memory_manager::put_image_files (string image) {
-    if (this -> image_file_lists.count (image) == 0)
-        this -> image_file_lists [image] = get_directory_list (image);
+void memory_manager::load_image_list (string image) {
+    if (this -> image_list.count (image) == 0)
+        this -> image_list [image] = get_directory_list (image);
 }
 
 memory_manager::~memory_manager () {
     map <string, vector <string>*>::iterator file_list;
-    for (file_list = this -> image_file_lists.begin (); file_list != this -> image_file_lists.end (); file_list++) {
+    for (file_list = this -> image_list.begin (); file_list != this -> image_list.end (); file_list++) {
         delete file_list -> second;
     }
     
     map <string, animation*>::iterator a_curr;
-    for (a_curr = this -> a_loaded.begin (); a_curr != this -> a_loaded.end (); a_curr++) {
+    for (a_curr = this -> animations.begin (); a_curr != this -> animations.end (); a_curr++) {
         delete a_curr -> second;
     }
 }

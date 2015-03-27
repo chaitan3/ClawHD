@@ -1,13 +1,14 @@
 Bugs:
     Plane movement speed
     Read PID files directly
-    string memory management
     function call without variable use?
     change name to logic
-    
+Features:
+    rebalancing kdtree
+    decouple action and animation
+Sound
 Physics
 AI
-Sound
 Menu
 
 Valgrind Memory checks

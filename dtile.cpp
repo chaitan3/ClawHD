@@ -14,6 +14,9 @@ bool z_compare (dynamic_tile* left, dynamic_tile* right) {
     return left -> get_z () < right -> get_z ();
 }
 
+string dynamic_tile::get_name () {
+    return this -> name;
+}
 string dynamic_tile::get_image () {
     return this -> image;
 }
@@ -22,11 +25,21 @@ string dynamic_tile::get_anim () {
     return this -> anim;
 }
 
-void dynamic_tile::set_anim (string anim_new) {
+string dynamic_tile::get_prev_anim () {
+    return this -> prev_anim;
+}
+
+void dynamic_tile::set_anim (string anim) {
     this -> anim_state.reset ();
-    this -> anim = anim_new;
+    this -> prev_anim = this->anim;
+    this -> anim = anim;
 }
     
+void dynamic_tile::reset_anim (string anim) {
+    this -> anim_state.reset ();
+    this -> prev_anim = anim;
+    this -> anim = anim;
+}
 
 int dynamic_tile::get_z () {
     return this -> z;
@@ -40,6 +53,7 @@ dynamic_tile::dynamic_tile (string n, string i, string a, coords* c, int c_z) {
     this -> name = n;
     this -> image = i;
     this -> anim = a;
+    this -> prev_anim = a;
     this -> c_pos = *c;
     this -> z = c_z;
     

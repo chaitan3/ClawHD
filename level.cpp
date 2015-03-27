@@ -113,10 +113,14 @@ level::level (string filename, memory_manager* mm) {
         // ARCHESFRONT HACK
         if (strcmp ("LEVEL_ARCHESFRONT", image) == 0)
             continue;
-            
-        dynamic_tile* d_tile = new dynamic_tile (string (name), folder_images, string (anim), &c_pos, z);
         
-        mm -> put_image_files (folder_images);
+        string sname(name);
+        string sanim(anim);
+        if (sname == "GlitterlessPowerup") {
+            sanim = "GAME_ANIS_GLITTER1";
+        }
+        dynamic_tile* d_tile = new dynamic_tile (sname, folder_images, sanim, &c_pos, z);
+        mm -> load_image_list (folder_images);
         mm -> insert_dynamic_tile (d_tile);
     }
     delete[] inflated_data;
