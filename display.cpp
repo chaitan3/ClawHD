@@ -43,16 +43,15 @@ int display::copy_tile_to_display (string tile, coords* c_pos, bool mirrored) {
     src.h = height;
     dest.w = width;
     dest.h = height;
+    SDL_RendererFlip flip = SDL_FLIP_NONE;
     if (mirrored) {
         dest.x = c_pos -> x - width / 2 - t_curr -> c_off -> x;
+        flip = SDL_FLIP_HORIZONTAL;
     }
     else {
         dest.x = c_pos -> x - width / 2 + t_curr -> c_off -> x;
     }
     dest.y = c_pos -> y - height / 2 + t_curr -> c_off -> y;
-    SDL_RendererFlip flip = SDL_FLIP_NONE;
-    if (mirrored)
-        flip = SDL_FLIP_HORIZONTAL;
     int ret = SDL_RenderCopyEx (this -> renderer, t_curr -> tx, &src, &dest, 0, NULL, flip);
     if (ret != 0) {
         cout << "Failed to copy texture: " << tile << endl;

@@ -32,7 +32,7 @@ int main (int argc, char **argv)
 {   
     display disp;
     memory_manager mm;
-    level l1 ("../Extracted/LEVEL1/WORLDS/WORLD.WWD", &mm);
+    level l1 ("../Extracted/LEVEL14/WORLDS/WORLD.WWD", &mm);
     coords* start_state = l1.get_start_location ();
     dynamic_tile* d_claw = new dynamic_tile ("Captain Claw", CLAW, "CLAW_ANIS_STAND", start_state, 3000);
     mm.insert_dynamic_tile (d_claw);
