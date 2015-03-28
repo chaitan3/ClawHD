@@ -18,8 +18,8 @@ class plane {
     
     char* import_tile_ids (char *);
     int32_t** get_tile_ids ();
-    int get_width ();
-    int get_height ();
+    tuple<int, int> get_dimensions ();
+    tuple<int, int> get_movement_speeds ();
     int get_z();
     plane (int, int, int, int, int, int, int, int32_t);
     ~plane ();

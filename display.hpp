@@ -32,6 +32,9 @@ class display {
     tile_memory_manager tmm;
     int height;
     int width;
+    coords* plane_cursors;
+    coords* plane_indices;
+    coords cursor;
     
     void import_tile_texture (string);
     int copy_tile_to_display (string, coords*, bool);

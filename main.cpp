@@ -32,9 +32,13 @@ int main (int argc, char **argv)
 {   
     display disp;
     memory_manager mm;
-    level l_curr (DATA2_PREFIX + "LEVEL14/WORLDS/WORLD.WWD", &mm);
+    string l_curr_str = "1";
+    if (argc > 1) {
+        l_curr_str = string(argv[1]);
+    }
+    level l_curr (DATA2_PREFIX + "LEVEL" + l_curr_str + "/WORLDS/WORLD.WWD", &mm);
     coords* start_state = l_curr.get_start_location ();
-    dynamic_tile* d_claw = new dynamic_tile ("Captain Claw", CLAW, "CLAW_ANIS_STAND", start_state, 100000);
+    dynamic_tile* d_claw = new dynamic_tile ("Captain Claw", CLAW, "CLAW_ANIS_STAND", start_state, 8999);
     mm.insert_dynamic_tile (d_claw);
     mm.load_image_list (CLAW);
     

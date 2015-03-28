@@ -190,11 +190,12 @@ char* plane::import_tile_ids (char *ptr) {
 int plane::get_z () {
     return this -> c_z;
 }
-int plane::get_width () {
-    return this -> width;
+
+tuple<int, int> plane::get_dimensions () {
+    return make_tuple (this -> width, this -> height);
 }
-int plane::get_height () {
-    return this -> height;
+tuple<int, int> plane::get_movement_speeds () {
+    return make_tuple (this -> x_move_speed, this -> y_move_speed);
 }
 
 int32_t** plane::get_tile_ids () {

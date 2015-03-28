@@ -37,6 +37,11 @@ void memory_manager::load_image_list (string image) {
         this -> image_list [image] = get_directory_list (image);
 }
 
+string memory_manager::get_image_from_list (string image, int frame) {
+    int num_images = this -> image_list[image] -> size ();
+    return this -> image_list [image] -> at (frame % num_images);
+}
+
 memory_manager::~memory_manager () {
     map <string, vector <string>*>::iterator file_list;
     for (file_list = this -> image_list.begin (); file_list != this -> image_list.end (); file_list++) {

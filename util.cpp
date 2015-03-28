@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
-int f_read_integer (ifstream *file, int offset) {
+int32_t f_read_integer (ifstream *file, int offset) {
     uint32_t val;
     file -> seekg (offset, ios::beg);
     file -> read ((char *) &val, sizeof (val));
@@ -96,8 +96,8 @@ coords* get_offset_from_pid (string tile) {
     return c_off;
 }
 coords::coords () {
-    this -> x = 0;
-    this -> y = 0;
+    this -> x = -1;
+    this -> y = -1;
 }
 
 coords::coords (int a, int b) {

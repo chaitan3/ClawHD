@@ -54,6 +54,10 @@ dynamic_tile::dynamic_tile (string name, string image, string anim, coords* c, i
         anim = "GAME_ANIS_GLITTER1";
     } else if (name == "TreasurePowerup") {
         //anim = "GAME_ANIS_GLITTER2";
+    } else if (name == "FrontAniCandy") {
+        anim = "GAME_ANIS_GLITTER1";
+    } else if (name == "BehindAniCandy") {
+        anim = "GAME_ANIS_GLITTER1";
     }
  
     this -> name = name;

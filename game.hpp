@@ -20,6 +20,7 @@ class memory_manager {
     
     string get_default_image (string);
     void load_image_list (string);
+    string get_image_from_list(string, int);
     
     ~memory_manager ();
 };

@@ -1,7 +1,7 @@
 CC = g++
 TARGET = ./claw
 ERRORS = errors.out
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -std=c++11
 LFLAGS = -g
 LIBS =  -lSDL2 -lSDL2_image
 OBJ = main.o util.o level.o display.o miniz.o animate.o dtile.o game.o

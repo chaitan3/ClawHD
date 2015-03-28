@@ -20,6 +20,8 @@ display::display() {
         exit (1);
     }
     SDL_RenderClear (renderer);
+    this -> plane_cursors = new coords[3];
+    this -> plane_indices = new coords[3];
 }
 
 display::~display () {
@@ -63,8 +65,9 @@ int display::copy_tile_to_display (string tile, coords* c_pos, bool mirrored) {
 void display::import_tile_texture (string file) {
     string t_file = DATA_PREFIX + convert_folder_path_to_unix (file) + TEXTURE_FILE_TYPE;
     // LEVEL1 ACTION 074 HACK
-    if (!f_exists (t_file)) 
+    if (!f_exists (t_file)) {
         t_file.erase (remove (t_file.begin (), t_file.end (), '0'), t_file.end ());
+    }
         
     SDL_Surface* surface = IMG_Load (t_file.c_str ());
     if (surface == NULL) {
@@ -87,9 +90,10 @@ void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos
     kdtree <dynamic_tile*>* dynamic_tiles = mm -> get_dynamic_tiles ();
     
     coords c_draw_pos;
-    int i, j, i_start, j_start;
     int top = c_pos -> y - this -> height / 2;
     int left = c_pos -> x - this -> width / 2;
+    static int prev_top = top;
+    static int prev_left = left;
 
     coords c_top_left (left - RENDERER_PADDING, top - RENDERER_PADDING);
     coords c_bottom_right (left + this -> width + RENDERER_PADDING, top + this -> height + RENDERER_PADDING);
@@ -101,14 +105,30 @@ void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos
     for (int k = 0; k < l_current -> get_num_planes (); k++) {
         plane* p_curr = l_current -> get_plane (k);
         int32_t **tiles = p_curr -> get_tile_ids ();
-        int num_w_tiles =  p_curr -> get_width ();
-        int num_h_tiles =  p_curr -> get_height ();
-        i_start = top / TILE_SIZE;
-        j_start = left / TILE_SIZE;
-        cout << k << p_curr -> get_z() << endl;
-        for (i = i_start, c_draw_pos.y = i_start * TILE_SIZE + TILE_SIZE / 2; c_draw_pos.y < this -> height + top + TILE_SIZE / 2; i++, c_draw_pos.y += TILE_SIZE) {
-            for (j = j_start, c_draw_pos.x = j_start * TILE_SIZE + TILE_SIZE / 2; c_draw_pos.x < this -> width + left + TILE_SIZE / 2; j++, c_draw_pos.x += TILE_SIZE) {
+        int num_w_tiles, num_h_tiles, x_move_speed, y_move_speed;
+        tie (num_w_tiles, num_h_tiles) = p_curr -> get_dimensions ();
+        tie (x_move_speed, y_move_speed) = p_curr -> get_movement_speeds ();
+
+        int i_start, j_start;
+        if (this -> plane_cursors[k].y < 0) {
+            this -> plane_cursors[k].y = top;
+            this -> plane_cursors[k].x = left;
+            this -> plane_indices[k].y = (this -> plane_cursors[k].y ) * y_move_speed / (TILE_SIZE * 100);
+            this -> plane_indices[k].x = (this -> plane_cursors[k].x ) * x_move_speed / (TILE_SIZE * 100);
+        }
+        this -> plane_cursors[k].y += (top - prev_top) * y_move_speed/ 100;
+        this -> plane_cursors[k].x += (left - prev_left) * x_move_speed/ 100;
+        i_start = (this -> plane_cursors[k].y ) * y_move_speed / (TILE_SIZE * 100);
+        j_start = (this -> plane_cursors[k].x ) * x_move_speed / (TILE_SIZE * 100);
+        int x_start = (j_start * 100 * TILE_SIZE) / x_move_speed - plane_cursors[k].x + left;
+        int y_start = (i_start * 100 * TILE_SIZE) / y_move_speed - plane_cursors[k].y + top;
+
+        //cout << k << " " << j_start << " " << prev_j << " " << x_start << " " << endl;
+        int i, j;
+        for (i = i_start, c_draw_pos.y = y_start + TILE_SIZE/2; c_draw_pos.y < this -> height + y_start + TILE_SIZE / 2; i++, c_draw_pos.y += TILE_SIZE) {
+            for (j = j_start, c_draw_pos.x = x_start + TILE_SIZE/2; c_draw_pos.x < this -> width + x_start + TILE_SIZE / 2; j++, c_draw_pos.x += TILE_SIZE) {
                 int tileID = tiles [i % num_h_tiles][j % num_w_tiles];
+                //cout <<  k << " " << x_move_speed  << " " << j << " " << tileID << endl;
                 if (tileID >= 0) {
                     string tile = p_curr -> folder_prefix + convert_to_three_digits (tileID);
                     dynamic_tile* static_tile = new dynamic_tile(tile, &c_draw_pos, p_curr -> get_z ());
@@ -118,6 +138,9 @@ void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos
             }
         }
     }
+    prev_top = top;
+    prev_left = left;
+
     // Render Dynamic Tiles
     sort (interior_tiles -> begin (), interior_tiles -> end (), z_compare);
     
@@ -142,7 +165,12 @@ void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos
                 it--; continue;
             }
             else {
-                tile = image + string ("_FRAME") +  convert_to_three_digits (frame);
+                // CLAW IMAGES HACK
+                if (image == "CLAW_IMAGES") {
+                    tile = image + string ("_FRAME") +  convert_to_three_digits (frame);
+                } else {
+                    tile = mm -> get_image_from_list(image, frame);
+                }
             }
             
         }
