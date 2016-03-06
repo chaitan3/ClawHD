@@ -1,12 +1,11 @@
 #include "display.hpp"
 #include "dtile.hpp"
-#include <SDL2/SDL_image.h>
 
 display::display() {
     this -> height = 600;
     this -> width = 1000;
     
-    SDL_Init(SDL_INIT_VIDEO);
+    SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
     this -> window = SDL_CreateWindow ("Captain Claw",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, this -> width, 
         this -> height, SDL_WINDOW_SHOWN);
@@ -22,9 +21,15 @@ display::display() {
     SDL_RenderClear (renderer);
     this -> plane_cursors = new coords[3];
     this -> plane_indices = new coords[3];
+
+    if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1) {
+        cout << "Unable to initialize Audio" << endl;
+        exit (1);
+    }
 }
 
 display::~display () {
+    Mix_CloseAudio ();
     SDL_DestroyRenderer (this -> renderer);
     SDL_DestroyWindow (this -> window);
     SDL_Quit ();
@@ -151,6 +156,12 @@ void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos
     for (it = interior_tiles -> begin (); it != interior_tiles -> end (); it++) {
         dynamic_tile* d_tile = *it;
         coords* c_tile_pos = d_tile -> get_coords ();
+        //cout << d_tile -> get_name () << " " << d_tile -> get_anim () << " " << d_tile -> get_image () << endl;
+        //
+        if (d_tile -> get_image () == "GAME\\IMAGES_SOUNDICON") {
+            //cout << d_tile -> get_anim () << endl;
+            continue;
+        }
         
         string tile;
         string anim = d_tile -> get_anim ();

@@ -50,15 +50,15 @@ coords* dynamic_tile::get_coords () {
 }
 
 dynamic_tile::dynamic_tile (string name, string image, string anim, coords* c, int c_z) {
-    if (name == "GlitterlessPowerup") {
-        anim = "GAME_ANIS_GLITTER1";
-    } else if (name == "TreasurePowerup") {
-        //anim = "GAME_ANIS_GLITTER2";
-    } else if (name == "FrontAniCandy") {
-        anim = "GAME_ANIS_GLITTER1";
-    } else if (name == "BehindAniCandy") {
-        anim = "GAME_ANIS_GLITTER1";
-    }
+    //if (name == "GlitterlessPowerup") {
+    //    anim = "GAME_ANIS_GLITTER1";
+    //} else if (name == "TreasurePowerup") {
+    //    //anim = "GAME_ANIS_GLITTER2";
+    //} else if (name == "FrontAniCandy") {
+    //    anim = "GAME_ANIS_GLITTER1";
+    //} else if (name == "BehindAniCandy") {
+    //    anim = "GAME_ANIS_GLITTER1";
+    //}
  
     this -> name = name;
     this -> image = image;

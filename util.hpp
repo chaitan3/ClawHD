@@ -10,10 +10,12 @@
 #include <map>
 #include <algorithm>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 
 //PID HACK
 #define DATA_PREFIX string ("images/")
 #define DATA2_PREFIX string ("rez/")
+#define SOUNDS_PREFIX string ("sounds/")
 
 #define SEPARATOR string ("/")
 

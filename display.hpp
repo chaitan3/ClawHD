@@ -3,6 +3,7 @@
 #include "util.hpp"
 #include "level.hpp"
 #include "game.hpp"
+#include <SDL2/SDL_image.h>
 
 #define TILE_SIZE 64
 #define RENDERER_PADDING 50

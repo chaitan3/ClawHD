@@ -24,6 +24,7 @@
 #include "util.hpp"
 #include "level.hpp"
 #include "game.hpp"
+#include "sound.hpp"
 #include "display.hpp"
 
 #define CLAW "CLAW_IMAGES"
@@ -32,6 +33,8 @@ int main (int argc, char **argv)
 {   
     display disp;
     memory_manager mm;
+    sound_manager snd;
+
     string l_curr_str = "1";
     if (argc > 1) {
         l_curr_str = string(argv[1]);
@@ -45,6 +48,7 @@ int main (int argc, char **argv)
     coords* state = d_claw -> get_coords ();
     SDL_Event event;
     int scroll_speed = 7;
+    int jump_speed = 5;
     int latency = 10;
     int count;
     const uint8_t* key_state;
@@ -61,11 +65,13 @@ int main (int argc, char **argv)
             if (key_state [SDL_SCANCODE_LCTRL]) {
                 if (anim != "CLAW_ANIS_SWIPE") {
                     d_claw -> set_anim ("CLAW_ANIS_SWIPE");
+                    snd.play_file ("CLAW_SOUNDS_SWORDSWISH");
                 }
             }
             else if (key_state [SDL_SCANCODE_LALT]) {
                 if (anim != "CLAW_ANIS_PISTOL") {
                     d_claw -> set_anim ("CLAW_ANIS_PISTOL");
+                    snd.play_file ("CLAW_SOUNDS_GUNSHOT");
                 }
             }
         }
@@ -77,6 +83,9 @@ int main (int argc, char **argv)
             else if (key_state [SDL_SCANCODE_LEFT]) {
                 d_claw -> mirrored = true;
                 d_claw -> set_anim ("CLAW_ANIS_WALK");
+            }
+            else if (key_state [SDL_SCANCODE_SPACE]) {
+                d_claw -> set_anim ("CLAW_ANIS_JUMP");
             }
             
         }
@@ -93,6 +102,21 @@ int main (int argc, char **argv)
             }
             else
                 d_claw -> reset_anim ("CLAW_ANIS_STAND");
+        }
+        else if (anim == "CLAW_ANIS_JUMP") {
+            mm.remove_dynamic_tile(d_claw);
+            animation_state *jump = d_claw -> get_animation_state();
+            if (jump -> frame > 7)
+                state -> y += jump_speed;
+            else
+                state -> y -= jump_speed;
+            if ((key_state [SDL_SCANCODE_RIGHT]) && !(d_claw -> mirrored)) {
+                state -> x += scroll_speed;
+            }
+            else if (key_state [SDL_SCANCODE_LEFT] && (d_claw -> mirrored)) {
+                state -> x -= scroll_speed;
+            }
+            mm.insert_dynamic_tile(d_claw);
         }
         disp.render_screen (&mm, &l_curr, state);
         SDL_Delay (latency);

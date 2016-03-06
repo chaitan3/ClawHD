@@ -109,7 +109,7 @@ level::level (string filename, memory_manager* mm) {
         name [name_len] = '\0';
         memcpy (image, ptr_data + name_len, image_len);
         image [image_len] = '\0';
-        memcpy (anim, ptr_data + name_len, anim_len);
+        memcpy (anim, ptr_data + image_len + name_len, anim_len);
         anim [anim_len] = '\0';
         ptr_data += name_len + image_len + anim_len + 8;
         
@@ -127,11 +127,13 @@ level::level (string filename, memory_manager* mm) {
         
         string sname(name);
         string sanim(anim);
+
         dynamic_tile* d_tile = new dynamic_tile (sname, folder_images, sanim, &c_pos, z);
         mm -> load_image_list (folder_images);
         mm -> insert_dynamic_tile (d_tile);
     }
     delete[] inflated_data;
+    //exit(1);
 }
 
 char* level::get_compressed_data (ifstream* file, int offset, int inflated_len) {
