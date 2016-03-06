@@ -1,6 +1,7 @@
 #ifndef DTILE_H
 #define DTILE_H
 #include "util.hpp"
+#include "physics.hpp"
 #include "animate.hpp"
 
 class dynamic_tile {
@@ -9,6 +10,7 @@ class dynamic_tile {
     string anim;
     string prev_anim;
     coords c_pos;
+    bounding_box* box;
     int z;
     animation_state anim_state;
     
@@ -16,6 +18,8 @@ class dynamic_tile {
     bool mirrored;
     
     coords* get_coords ();
+    bounding_box* get_bounding_box ();
+    void set_bounding_box (bounding_box*);
     int get_z ();
     animation_state* get_animation_state ();
     dynamic_tile (string, string, string, coords*, int);

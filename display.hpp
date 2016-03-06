@@ -3,7 +3,7 @@
 #include "util.hpp"
 #include "level.hpp"
 #include "game.hpp"
-#include <SDL2/SDL_image.h>
+#include "physics.hpp"
 
 #define TILE_SIZE 64
 #define RENDERER_PADDING 50
@@ -13,6 +13,7 @@ class texture {
     public:
     SDL_Texture* tx;
     coords* c_off;
+    int width, height;
     
     texture (SDL_Texture*, coords*);
 };
@@ -38,10 +39,10 @@ class display {
     coords cursor;
     
     void import_tile_texture (string);
-    int copy_tile_to_display (string, coords*, bool);
+    bounding_box* copy_tile_to_display (string, coords*, coords*, bool);
 
     public:
-    void render_screen (memory_manager* , level*, coords*);
+    vector <dynamic_tile*>* render_screen (memory_manager* , level*, coords*);
     display ();
     ~display ();
 };

@@ -39,6 +39,7 @@ int main (int argc, char **argv)
     if (argc > 1) {
         l_curr_str = string(argv[1]);
     }
+    snd.level = l_curr_str;
     level l_curr (DATA2_PREFIX + "LEVEL" + l_curr_str + "/WORLDS/WORLD.WWD", &mm);
     coords* start_state = l_curr.get_start_location ();
     dynamic_tile* d_claw = new dynamic_tile ("Captain Claw", CLAW, "CLAW_ANIS_STAND", start_state, 8999);
@@ -118,7 +119,11 @@ int main (int argc, char **argv)
             }
             mm.insert_dynamic_tile(d_claw);
         }
-        disp.render_screen (&mm, &l_curr, state);
+
+        vector <dynamic_tile*>* interior_tiles = disp.render_screen (&mm, &l_curr, state);
+        collision_detection (&mm, &snd, d_claw, interior_tiles);
+        delete interior_tiles;
+
         SDL_Delay (latency);
         
         prev_key_state = new uint8_t [count];

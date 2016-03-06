@@ -49,6 +49,18 @@ coords* dynamic_tile::get_coords () {
     return &(this -> c_pos);
 }
 
+
+bounding_box* dynamic_tile::get_bounding_box () {
+    return this -> box;
+}
+
+void dynamic_tile::set_bounding_box (bounding_box *new_box) {
+    if (this -> box != NULL) {
+        delete this -> box;
+    }
+    this -> box = new_box;
+}
+
 dynamic_tile::dynamic_tile (string name, string image, string anim, coords* c, int c_z) {
     //if (name == "GlitterlessPowerup") {
     //    anim = "GAME_ANIS_GLITTER1";
@@ -67,13 +79,17 @@ dynamic_tile::dynamic_tile (string name, string image, string anim, coords* c, i
     this -> c_pos = *c;
     this -> z = c_z;
     this -> mirrored = false;
+    this -> box = NULL;
 }
 
 dynamic_tile::dynamic_tile (string image, coords *c, int c_z) {
-    this -> z = c_z;
-    this -> c_pos = *c;
+    this -> name = "";
     this -> image = image;
+    this -> anim = "";
+    this -> c_pos = *c;
+    this -> z = c_z;
     this -> mirrored = false;
+    this -> box = NULL;
 }
 
 animation_state* dynamic_tile::get_animation_state () {

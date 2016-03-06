@@ -35,36 +35,43 @@ display::~display () {
     SDL_Quit ();
 }
 
-int display::copy_tile_to_display (string tile, coords* c_pos, bool mirrored) {
+bounding_box* display::copy_tile_to_display (string tile, coords* c_pos, coords* c_off, bool mirrored) {
     SDL_Rect src, dest;
-    int width, height;
+    SDL_RendererFlip flip = SDL_FLIP_NONE;
     
     if (!(this -> tmm.contains_tile (tile)))
         this -> import_tile_texture (tile);
     texture* t_curr = this -> tmm.get_tile_texture (tile);
-    SDL_QueryTexture (t_curr -> tx, NULL, NULL, &width, &height);
-    
+
+    int width = t_curr -> width;
+    int height = t_curr -> height;
+    int x = c_pos -> x - width / 2;
+    if (mirrored) {
+        x -= t_curr -> c_off -> x;
+        flip = SDL_FLIP_HORIZONTAL;
+    }
+    else {
+        x += t_curr -> c_off -> x;
+    }
+    int y = c_pos -> y - height / 2 + t_curr -> c_off -> y;
+
     src.x = 0;
     src.y = 0;
     src.w = width;
     src.h = height;
     dest.w = width;
     dest.h = height;
-    SDL_RendererFlip flip = SDL_FLIP_NONE;
-    if (mirrored) {
-        dest.x = c_pos -> x - width / 2 - t_curr -> c_off -> x;
-        flip = SDL_FLIP_HORIZONTAL;
-    }
-    else {
-        dest.x = c_pos -> x - width / 2 + t_curr -> c_off -> x;
-    }
-    dest.y = c_pos -> y - height / 2 + t_curr -> c_off -> y;
+    dest.x = x - c_off -> x;
+    dest.y = y - c_off -> y;
     int ret = SDL_RenderCopyEx (this -> renderer, t_curr -> tx, &src, &dest, 0, NULL, flip);
     if (ret != 0) {
         cout << "Failed to copy texture: " << tile << endl;
         exit (1);
     }
-    return 0;
+    coords* top_left = new coords (x, y);
+    coords* bottom_right = new coords (x + width, y + height);
+    bounding_box *box = new bounding_box (top_left, bottom_right);
+    return box;
 }
 
 void display::import_tile_texture (string file) {
@@ -91,7 +98,7 @@ void display::import_tile_texture (string file) {
     SDL_FreeSurface (surface);
 }
 
-void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos) {
+vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_current, coords* c_pos) {
     kdtree <dynamic_tile*>* dynamic_tiles = mm -> get_dynamic_tiles ();
     
     coords c_draw_pos;
@@ -103,6 +110,7 @@ void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos
     coords c_top_left (left - RENDERER_PADDING, top - RENDERER_PADDING);
     coords c_bottom_right (left + this -> width + RENDERER_PADDING, top + this -> height + RENDERER_PADDING);
     vector <dynamic_tile*>* interior_tiles = dynamic_tiles -> range_search (&c_top_left, &c_bottom_right);
+    vector <dynamic_tile*>* interior_dynamic_tiles = new vector<dynamic_tile*>(*interior_tiles);
     vector <dynamic_tile*> static_tiles;
     
     // Assume Claw at center of screen
@@ -158,9 +166,10 @@ void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos
         coords* c_tile_pos = d_tile -> get_coords ();
         //cout << d_tile -> get_name () << " " << d_tile -> get_anim () << " " << d_tile -> get_image () << endl;
         //
+        //FIX THIS
         if (d_tile -> get_image () == "GAME\\IMAGES_SOUNDICON") {
             //cout << d_tile -> get_anim () << endl;
-            continue;
+            //continue;
         }
         
         string tile;
@@ -188,16 +197,16 @@ void display::render_screen (memory_manager* mm, level* l_current, coords* c_pos
         else {
             tile = mm -> get_default_image (image);
         }
-        c_draw_pos.x = c_tile_pos -> x - left;
-        c_draw_pos.y = c_tile_pos -> y - top;
-        this -> copy_tile_to_display (tile, &c_draw_pos, d_tile -> mirrored);
+        coords top_left (left, top);
+        bounding_box* box = this -> copy_tile_to_display (tile, c_tile_pos, &top_left, d_tile -> mirrored);
+        d_tile -> set_bounding_box (box);
         num_d_tiles ++;
     }
-    delete interior_tiles;
     for (it = static_tiles.begin(); it != static_tiles.end(); it++)
         delete *it;
     
     SDL_RenderPresent(this -> renderer);
+    return interior_dynamic_tiles;
 }
 
 texture* tile_memory_manager::get_tile_texture (string tile) {
@@ -223,6 +232,7 @@ tile_memory_manager::~tile_memory_manager () {
 
 texture::texture (SDL_Texture* new_tx, coords* c_offset) {
     this -> tx = new_tx;
+    SDL_QueryTexture (this -> tx, NULL, NULL, &(this -> width), &(this -> height));
     this -> c_off = c_offset;
 }
 

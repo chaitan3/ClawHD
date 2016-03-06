@@ -4,7 +4,7 @@ ERRORS = errors.out
 CFLAGS = -Wall -g -std=c++11
 LFLAGS = -g
 LIBS =  -lSDL2 -lSDL2_image -lSDL2_mixer
-OBJ = main.o util.o level.o display.o miniz.o animate.o dtile.o game.o sound.o
+OBJ = main.o util.o level.o display.o miniz.o animate.o dtile.o game.o sound.o physics.o
 all: $(TARGET)
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c $^
