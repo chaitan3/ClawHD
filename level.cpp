@@ -31,6 +31,7 @@ level::level (string filename, memory_manager* mm) {
         if (val.length () == 0)
             break;
         key = f_read_path (&f_wwd, cursor - num_sources * 0x60 + 0x200, 0x20);
+        replace (val.begin(), val.end(), '\\', '_');
         this -> image_sources [key] = val;
         cursor += 0x80;
         num_sources ++;
@@ -38,9 +39,12 @@ level::level (string filename, memory_manager* mm) {
     
     // Get  compressed data
     char* inflated_data = this -> get_compressed_data (&f_wwd, offset, inflated_len);
+    save_to_file (filename + ".ext", inflated_data, inflated_len);
+
     
     // Get resolution of the 3 planes
     char* ptr_data = inflated_data;
+    //char *tmp = inflated_data;
     int width, height, tile_width, tile_height, x_move_speed, y_move_speed, fill_color;
     int32_t c_z;
     for (int i = 0; i < this -> num_planes; i++) {
@@ -70,7 +74,7 @@ level::level (string filename, memory_manager* mm) {
         memcpy (&c_z, ptr_data, 4);
         ptr_data += 0x10;
 
-        cout << i << " " << fill_color << " " << c_z << endl;
+        //cout << i << " " << num_objects << " " << fill_color << " " << c_z << endl;
         plane* p = new plane (tile_width, tile_height, width, height, x_move_speed, y_move_speed, fill_color, c_z);
         this -> planes.push_back (p);
     }
@@ -119,6 +123,7 @@ level::level (string filename, memory_manager* mm) {
         strncpy (key, image, len);
         strcpy (path, image + len + 1);
         key [len] = '\0';
+        //cout << image_sources[key] << " " << path << endl;
         string folder_images = image_sources [key] + string ("_") + string (path);
         
         // ARCHESFRONT HACK
@@ -129,9 +134,13 @@ level::level (string filename, memory_manager* mm) {
         string sanim(anim);
 
         dynamic_tile* d_tile = new dynamic_tile (sname, folder_images, sanim, &c_pos, z);
-        mm -> load_image_list (folder_images);
-        mm -> insert_dynamic_tile (d_tile);
+        if (mm != NULL) {
+            mm -> load_image_list (folder_images);
+            mm -> insert_dynamic_tile (d_tile);
+        }
     }
+    
+    
     delete[] inflated_data;
     //exit(1);
 }

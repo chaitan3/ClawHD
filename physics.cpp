@@ -33,7 +33,8 @@ void collision_detection (memory_manager* mm, sound_manager *snd, dynamic_tile* 
         }
         if (A -> intersecting (B)) {
             string image = d_tile -> get_image ();
-            if (image == "GAME\\IMAGES_SOUNDICON") {
+            cout << image << endl;
+            if (image == "GAME_IMAGES_SOUNDICON") {
                 string anim = d_tile -> get_anim ();    
                 snd -> play_file (anim);
                 mm -> remove_dynamic_tile (d_tile);

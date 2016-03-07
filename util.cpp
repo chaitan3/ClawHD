@@ -4,6 +4,12 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
+void save_to_file (string filename, char* ptr_data, int len) {
+   ofstream file (filename, ios::out | ios::binary);
+   file.write (ptr_data, len);
+   file.close ();
+}
+
 int32_t f_read_integer (ifstream *file, int offset) {
     uint32_t val;
     file -> seekg (offset, ios::beg);

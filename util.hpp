@@ -22,6 +22,7 @@
 
 using namespace std;
 
+void save_to_file (string, char*, int);
 int f_read_integer (ifstream *, int );
 int f_read_short_int (ifstream *, int);
 string convert_to_three_digits (int);

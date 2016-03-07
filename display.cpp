@@ -142,11 +142,17 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
             for (j = j_start, c_draw_pos.x = x_start + TILE_SIZE/2; c_draw_pos.x < this -> width + x_start + TILE_SIZE / 2; j++, c_draw_pos.x += TILE_SIZE) {
                 int tileID = tiles [i % num_h_tiles][j % num_w_tiles];
                 //cout <<  k << " " << x_move_speed  << " " << j << " " << tileID << endl;
-                if (tileID >= 0) {
+                // TILE IDS 0 and -1 are invalid, find out why!
+                if (tileID > 0) {
                     string tile = p_curr -> folder_prefix + convert_to_three_digits (tileID);
                     dynamic_tile* static_tile = new dynamic_tile(tile, &c_draw_pos, p_curr -> get_z ());
-                    static_tiles.push_back (static_tile);
                     interior_tiles -> push_back (static_tile);
+                    if (k == 1) {
+                        interior_dynamic_tiles -> push_back (static_tile);
+                    }
+                    else {
+                        static_tiles.push_back (static_tile);
+                    }
                 }
             }
         }
