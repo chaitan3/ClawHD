@@ -41,6 +41,14 @@ void dynamic_tile::reset_anim (string anim) {
     this -> anim = anim;
 }
 
+action_tile* dynamic_tile::get_tile_attributes () {
+    return this -> attributes;
+}
+
+void dynamic_tile::set_tile_attributes (action_tile* attributes) {
+    this -> attributes = attributes;
+}
+
 int dynamic_tile::get_z () {
     return this -> z;
 }
@@ -80,6 +88,7 @@ dynamic_tile::dynamic_tile (string name, string image, string anim, coords* c, i
     this -> z = c_z;
     this -> mirrored = false;
     this -> box = NULL;
+    this -> attributes = NULL;
 }
 
 dynamic_tile::dynamic_tile (string image, coords *c, int c_z) {
@@ -90,6 +99,7 @@ dynamic_tile::dynamic_tile (string image, coords *c, int c_z) {
     this -> z = c_z;
     this -> mirrored = false;
     this -> box = NULL;
+    this -> attributes = NULL;
 }
 
 animation_state* dynamic_tile::get_animation_state () {

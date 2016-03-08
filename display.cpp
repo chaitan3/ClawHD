@@ -99,8 +99,6 @@ void display::import_tile_texture (string file) {
 }
 
 vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_current, coords* c_pos) {
-    kdtree <dynamic_tile*>* dynamic_tiles = mm -> get_dynamic_tiles ();
-    
     coords c_draw_pos;
     int top = c_pos -> y - this -> height / 2;
     int left = c_pos -> x - this -> width / 2;
@@ -109,8 +107,8 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
 
     coords c_top_left (left - RENDERER_PADDING, top - RENDERER_PADDING);
     coords c_bottom_right (left + this -> width + RENDERER_PADDING, top + this -> height + RENDERER_PADDING);
-    vector <dynamic_tile*>* interior_tiles = dynamic_tiles -> range_search (&c_top_left, &c_bottom_right);
-    vector <dynamic_tile*>* interior_dynamic_tiles = new vector<dynamic_tile*>(*interior_tiles);
+    vector <dynamic_tile*>* visible_tiles = mm -> get_dynamic_tiles () -> range_search (&c_top_left, &c_bottom_right);
+    vector <dynamic_tile*>* dynamic_tiles = new vector<dynamic_tile*>(*visible_tiles);
     vector <dynamic_tile*> static_tiles;
     
     // Assume Claw at center of screen
@@ -146,9 +144,10 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
                 if (tileID > 0) {
                     string tile = p_curr -> folder_prefix + convert_to_three_digits (tileID);
                     dynamic_tile* static_tile = new dynamic_tile(tile, &c_draw_pos, p_curr -> get_z ());
-                    interior_tiles -> push_back (static_tile);
+                    visible_tiles -> push_back (static_tile);
                     if (k == 1) {
-                        interior_dynamic_tiles -> push_back (static_tile);
+                        static_tile -> set_tile_attributes (l_current -> get_tile_attributes (tileID));
+                        dynamic_tiles -> push_back (static_tile);
                     }
                     else {
                         static_tiles.push_back (static_tile);
@@ -161,12 +160,12 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
     prev_left = left;
 
     // Render Dynamic Tiles
-    sort (interior_tiles -> begin (), interior_tiles -> end (), z_compare);
+    sort (visible_tiles -> begin (), visible_tiles -> end (), z_compare);
     
     int num_d_tiles = 0;
     SDL_RenderClear (renderer);
 
-    for (auto it: *interior_tiles) {
+    for (auto it: *visible_tiles) {
         dynamic_tile* d_tile = it;
         //cout << d_tile -> get_name () << " " << d_tile -> get_anim () << " " << d_tile -> get_image () << endl;
         //
@@ -217,7 +216,7 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
     }
     
     SDL_RenderPresent(this -> renderer);
-    return interior_dynamic_tiles;
+    return dynamic_tiles;
 }
 
 texture* tile_memory_manager::get_tile_texture (string tile) {

@@ -34,6 +34,7 @@ class level {
     plane* action_plane;
     string folder_tiles, folder_palette;
     map <string, string> image_sources;
+    map <int, action_tile> tile_attributes;
     
     char* get_compressed_data (ifstream*, int, int);
     
@@ -42,6 +43,7 @@ class level {
     ~level ();
     int get_num_planes ();
     coords* get_start_location ();
+    action_tile* get_tile_attributes (int);
     plane* get_action_plane ();
     plane* get_plane (int);
 };

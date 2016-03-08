@@ -4,19 +4,40 @@
 #include "physics.hpp"
 #include "animate.hpp"
 
+#define CLEAR 0
+#define SOLID 1
+#define GROUND 2
+#define CLIMB 3
+#define DEATH 4
+
+typedef struct {
+    int tile_type = -1;
+    int left = 0;
+    int top = 0;
+    int right = 0;
+    int bottom = 0;
+} action_tile;
+
+
 class dynamic_tile {
     string name;
     string image;
     string anim;
-    string prev_anim;
+
     coords c_pos;
-    bounding_box* box;
     int z;
+    action_tile* attributes;
+    bounding_box* box;
+
+    string prev_anim;
     animation_state anim_state;
     
     public:
     bool mirrored;
     
+
+    action_tile* get_tile_attributes ();
+    void set_tile_attributes (action_tile*);
     coords* get_coords ();
     bounding_box* get_bounding_box ();
     void set_bounding_box (bounding_box*);

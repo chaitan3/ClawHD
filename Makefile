@@ -1,4 +1,5 @@
-CC = g++
+CC = clang++
+#CC = g++
 CFLAGS = -Wall -g -std=c++11
 LFLAGS = -g
 LIBS =  -lSDL2 -lSDL2_image -lSDL2_mixer
@@ -20,7 +21,7 @@ test: test.o $(OBJ)
 	$(CC) $(LFLAGS) $^ -o $@ $(LIBS)
 
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -f $(TARGETOBJ) $(TARGET)
 
 memtest:
 	valgrind --tool=memcheck --leak-check=full $(TARGET) > $(ERRORS) 2>&1
