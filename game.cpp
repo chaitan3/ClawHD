@@ -43,13 +43,10 @@ string memory_manager::get_image_from_list (string image, int frame) {
 }
 
 memory_manager::~memory_manager () {
-    map <string, vector <string>*>::iterator file_list;
-    for (file_list = this -> image_list.begin (); file_list != this -> image_list.end (); file_list++) {
-        delete file_list -> second;
+    for (auto& file_list: this -> image_list) {
+        delete file_list.second;
     }
-    
-    map <string, animation*>::iterator a_curr;
-    for (a_curr = this -> animations.begin (); a_curr != this -> animations.end (); a_curr++) {
-        delete a_curr -> second;
+    for (auto& a_curr: this -> animations) {
+        delete a_curr.second;
     }
 }

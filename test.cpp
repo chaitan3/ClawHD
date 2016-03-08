@@ -1,6 +1,6 @@
 #include "level.hpp"
 
 int main (int argc, char** argv) {
-    level l ("rez/LEVEL1/WORLDS/WORLD.WWD", NULL);
+    level l (argv[1], NULL);
     return 0;
 }

@@ -163,53 +163,58 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
     // Render Dynamic Tiles
     sort (interior_tiles -> begin (), interior_tiles -> end (), z_compare);
     
-    vector <dynamic_tile*>::iterator it;
     int num_d_tiles = 0;
     SDL_RenderClear (renderer);
 
-    for (it = interior_tiles -> begin (); it != interior_tiles -> end (); it++) {
-        dynamic_tile* d_tile = *it;
-        coords* c_tile_pos = d_tile -> get_coords ();
+    for (auto it: *interior_tiles) {
+        dynamic_tile* d_tile = it;
         //cout << d_tile -> get_name () << " " << d_tile -> get_anim () << " " << d_tile -> get_image () << endl;
         //
+        string tile;
+        string image = d_tile -> get_image ();
         //FIX THIS
-        if (d_tile -> get_image () == "GAME\\IMAGES_SOUNDICON") {
+        if (image == "GAME_IMAGES_SOUNDICON") {
             //cout << d_tile -> get_anim () << endl;
             //continue;
         }
-        
-        string tile;
-        string anim = d_tile -> get_anim ();
-        string image = d_tile -> get_image ();
-            
-        animation* a_curr = mm -> get_animation (anim);
-        //cout << "display " << d_tile -> get_name () << " " << image << " " << anim << endl;
-        if (a_curr != NULL) {
-            int frame = a_curr -> get_next_frame (d_tile -> get_animation_state ());
-            if (frame == -1) {
-                d_tile -> reset_anim (d_tile -> get_prev_anim());
-                it--; continue;
+         
+        // MOVE TO animate.cpp
+        bool flag = true;
+        while (flag) {
+            string anim = d_tile -> get_anim ();
+            animation* a_curr = mm -> get_animation (anim);
+            //cout << "display " << d_tile -> get_name () << " " << image << " " << anim << endl;
+            if (a_curr != NULL) {
+                int frame = a_curr -> get_next_frame (d_tile -> get_animation_state ());
+                if (frame == -1) {
+                    d_tile -> reset_anim (d_tile -> get_prev_anim());
+                    continue;
+                }
+                else {
+                    // CLAW IMAGES HACK
+                    if (image == "CLAW_IMAGES") {
+                        tile = image + string ("_FRAME") +  convert_to_three_digits (frame);
+                    } else {
+                        tile = mm -> get_image_from_list(image, frame);
+                    }
+                }
+                
             }
             else {
-                // CLAW IMAGES HACK
-                if (image == "CLAW_IMAGES") {
-                    tile = image + string ("_FRAME") +  convert_to_three_digits (frame);
-                } else {
-                    tile = mm -> get_image_from_list(image, frame);
-                }
+                tile = mm -> get_default_image (image);
             }
-            
+            flag = false;
         }
-        else {
-            tile = mm -> get_default_image (image);
-        }
+
         coords top_left (left, top);
+        coords* c_tile_pos = d_tile -> get_coords ();
         bounding_box* box = this -> copy_tile_to_display (tile, c_tile_pos, &top_left, d_tile -> mirrored);
         d_tile -> set_bounding_box (box);
         num_d_tiles ++;
     }
-    for (it = static_tiles.begin(); it != static_tiles.end(); it++)
-        delete *it;
+    for (auto& it: static_tiles) {
+        delete it;
+    }
     
     SDL_RenderPresent(this -> renderer);
     return interior_dynamic_tiles;
@@ -228,11 +233,10 @@ bool tile_memory_manager::contains_tile (string tile) {
 }
 
 tile_memory_manager::~tile_memory_manager () {
-    map <string, texture*>::iterator it;
-    for (it = this -> textures.begin (); it != this -> textures.end (); it++) {
-        SDL_DestroyTexture (it -> second -> tx);
-        delete it -> second -> c_off;
-        delete it -> second;
+    for (auto& it: this -> textures) {
+        SDL_DestroyTexture (it.second -> tx);
+        delete it.second -> c_off;
+        delete it.second;
     }
 }
 

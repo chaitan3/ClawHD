@@ -140,6 +140,50 @@ level::level (string filename, memory_manager* mm) {
         }
     }
     
+    set <int> action_tiles = this -> planes[1] -> get_unique_tiles ();
+    int num_action_tiles;
+    int temp;
+    memcpy (&num_action_tiles, ptr_data, 4);
+    ptr_data += 24;
+    /*for (int i = 0; i < num_action_tiles; i++) {
+        cout << i << " ";
+        memcpy (&temp, ptr_data, 4);
+        ptr_data += 4;
+        cout << temp << " ";
+        memcpy (&temp, ptr_data, 4);
+        ptr_data += 4;
+        cout << temp << " ";
+        memcpy (&temp, ptr_data, 4);
+        ptr_data += 4;
+        cout << temp << " ";
+        memcpy (&temp, ptr_data, 4);
+        ptr_data += 4;
+        cout << temp << " ";
+        memcpy (&temp, ptr_data, 4);
+        ptr_data += 4;
+        cout << temp << endl;
+    }*/
+    int id = 0;
+    for (auto& tileID: action_tiles) {
+        char *tile_data = ptr_data + (tileID + id)*20;
+        cout << tileID << " ";
+        memcpy (&temp, tile_data, 4);
+        tile_data += 4;
+        cout << temp << " ";
+        memcpy (&temp, tile_data, 4);
+        tile_data += 4;
+        cout << temp << " ";
+        memcpy (&temp, tile_data, 4);
+        tile_data += 4;
+        cout << temp << " ";
+        memcpy (&temp, tile_data, 4);
+        tile_data += 4;
+        cout << temp << " ";
+        memcpy (&temp, tile_data, 4);
+        tile_data += 4;
+        cout << temp << endl;
+        id ++;
+    }
     
     delete[] inflated_data;
     //exit(1);
@@ -183,6 +227,16 @@ plane* level::get_action_plane () {
 
 plane* level::get_plane (int i) {
     return this -> planes [i];
+}
+
+set<int> plane::get_unique_tiles () {
+    set <int> uniq_tiles;
+    for (int i = 0; i < this -> height; i++) {
+        for (int j = 0; j < this -> width; j++) {
+            uniq_tiles.insert (this -> tiles [i][j]);
+        }
+    }
+    return uniq_tiles;
 }
 
 char* plane::import_tile_ids (char *ptr) {

@@ -11,6 +11,12 @@ Physics
 AI
 Menu
 
+USE C++11 FEATURES:
+    move 
+    learn pointer management 
+    initialization
+    reorganize file structure
+
 Valgrind Memory checks
 Macros for offsets
 Portability

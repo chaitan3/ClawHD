@@ -8,7 +8,7 @@ TARGET = ./claw
 TARGETOBJ = main.o $(OBJ)
 ERRORS = errors.out
 
-all: $(TARGETOBJ)
+all: $(TARGET)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c $^
