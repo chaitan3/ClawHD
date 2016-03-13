@@ -29,13 +29,13 @@ string dynamic_tile::get_prev_anim () {
     return this -> prev_anim;
 }
 
-void dynamic_tile::set_anim (string anim) {
+void dynamic_tile::set_anim (const string& anim) {
     this -> anim_state.reset ();
     this -> prev_anim = this->anim;
     this -> anim = anim;
 }
     
-void dynamic_tile::reset_anim (string anim) {
+void dynamic_tile::reset_anim (const string& anim) {
     this -> anim_state.reset ();
     this -> prev_anim = anim;
     this -> anim = anim;
@@ -63,13 +63,13 @@ bounding_box* dynamic_tile::get_bounding_box () {
 }
 
 void dynamic_tile::set_bounding_box (bounding_box *new_box) {
-    if (this -> box != NULL) {
+    if (this -> box != nullptr) {
         delete this -> box;
     }
     this -> box = new_box;
 }
 
-dynamic_tile::dynamic_tile (string name, string image, string anim, coords* c, int c_z) {
+dynamic_tile::dynamic_tile (const string& name, const string& image, const string& anim, coords* c, int c_z) {
     //if (name == "GlitterlessPowerup") {
     //    anim = "GAME_ANIS_GLITTER1";
     //} else if (name == "TreasurePowerup") {
@@ -87,19 +87,19 @@ dynamic_tile::dynamic_tile (string name, string image, string anim, coords* c, i
     this -> c_pos = *c;
     this -> z = c_z;
     this -> mirrored = false;
-    this -> box = NULL;
-    this -> attributes = NULL;
+    this -> box = nullptr;
+    this -> attributes = nullptr;
 }
 
-dynamic_tile::dynamic_tile (string image, coords *c, int c_z) {
+dynamic_tile::dynamic_tile (const string& image, coords *c, int c_z) {
     this -> name = "";
     this -> image = image;
     this -> anim = "";
     this -> c_pos = *c;
     this -> z = c_z;
     this -> mirrored = false;
-    this -> box = NULL;
-    this -> attributes = NULL;
+    this -> box = nullptr;
+    this -> attributes = nullptr;
 }
 
 animation_state* dynamic_tile::get_animation_state () {

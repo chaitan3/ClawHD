@@ -10,8 +10,8 @@ class node {
     node* right;
     node (data_type d) {
         this -> data = d;
-        this -> left = NULL;
-        this -> right = NULL;
+        this -> left = nullptr;
+        this -> right = nullptr;
     }
 };
 
@@ -20,7 +20,7 @@ class kdtree {
     node<data_type>* root;
     
     void free (node <data_type>* curr) {
-        if (curr == NULL)
+        if (curr == nullptr)
             return;
         free (curr -> left);
         free (curr -> right);
@@ -29,11 +29,11 @@ class kdtree {
     }
     
     void actual_insert (node <data_type>* new_node, node <data_type>* curr, int depth) {
-        if (new_node == NULL)
+        if (new_node == nullptr)
             return;
         
         data_type data = new_node -> data;
-        if (curr == NULL) {
+        if (curr == nullptr) {
             this -> root = new_node;
         }
         else {
@@ -45,7 +45,7 @@ class kdtree {
                 result = data -> y_compare (curr -> data);
             }
             if (result) {
-                if (curr -> left == NULL) {
+                if (curr -> left == nullptr) {
                     curr -> left = new_node;
                 }
                 else {
@@ -53,7 +53,7 @@ class kdtree {
                 }
             }
             else {
-                if (curr -> right == NULL) {
+                if (curr -> right == nullptr) {
                     curr -> right = new_node;
                 }
                 else {
@@ -66,7 +66,7 @@ class kdtree {
     void actual_range_search (vector <data_type>* elements, coords* c_top_left, coords* c_bottom_right,
         node <data_type>* curr, int depth) {
          
-        if (curr == NULL) return;   
+        if (curr == nullptr) return;   
             
         coords *c_pos = curr -> data -> get_coords ();
         int x = c_pos -> x;
@@ -102,9 +102,9 @@ class kdtree {
     void actual_print_tree (node<data_type>* curr, int depth, bool right) {
         coords *c_pos = curr -> data -> get_coords ();
         cout << depth << " " << c_pos -> x << " " << c_pos -> y << " " << right << endl;
-        if (curr -> left != NULL)
+        if (curr -> left != nullptr)
             actual_print_tree (curr -> left, depth + 1, false);
-        if (curr -> right != NULL)
+        if (curr -> right != nullptr)
             actual_print_tree (curr -> right, depth + 1, true);
     }
     
@@ -135,16 +135,16 @@ class kdtree {
             }
             depth += 1;
         }
-        if (curr -> left != NULL) {
+        if (curr -> left != nullptr) {
             *conn = curr -> left;
             this -> actual_insert (curr -> right, curr -> left, depth);
         }
-        else if (curr -> right != NULL) {
+        else if (curr -> right != nullptr) {
             *conn = curr -> right;
             this -> actual_insert (curr -> left, curr -> right, depth);
         }
         else {
-            *conn = NULL;
+            *conn = nullptr;
         }
         delete curr;
     }
@@ -160,7 +160,7 @@ class kdtree {
     }
     
     kdtree () {
-        this -> root = NULL;
+        this -> root = nullptr;
     }
     
     ~kdtree () {

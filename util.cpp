@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
-void save_to_file (string filename, char* ptr_data, int len) {
+void save_to_file (const string& filename, char* ptr_data, int len) {
    ofstream file (filename, ios::out | ios::binary);
    file.write (ptr_data, len);
    file.close ();
@@ -53,20 +53,20 @@ string convert_int_to_string (int number) {
     return stream.str ();
 }
 
-bool f_exists (string name) {
+bool f_exists (const string& name) {
   struct stat buffer;   
   return stat (name.c_str(), &buffer) == 0; 
 }
 
-vector <string>* get_directory_list (string dir) {
+vector <string>* get_directory_list (const string& dir) {
     string read_dir = DATA_PREFIX + convert_folder_path_to_unix (dir);
     vector <string>* list_dir = new vector <string>;
     DIR* ptr_dir = opendir (read_dir.c_str ());
     
     struct dirent* file_dir;
     
-    if (ptr_dir != NULL) {
-        while ((file_dir = readdir (ptr_dir)) != NULL) {
+    if (ptr_dir != nullptr) {
+        while ((file_dir = readdir (ptr_dir)) != nullptr) {
             if (file_dir -> d_name [0] != '.') {
                 int len = strlen (file_dir -> d_name);
                 file_dir -> d_name [len - 4] = '\0'; 
@@ -79,19 +79,20 @@ vector <string>* get_directory_list (string dir) {
     return list_dir;
 }
 
-string convert_folder_path_to_unix (string str) {
-    replace (str.begin (), str.end (), '\\', '/');
-    replace (str.begin (), str.end (), '_', '/');
+string convert_folder_path_to_unix (const string& str) {
+    string path (str);
+    replace (path.begin (), path.end (), '\\', '/');
+    replace (path.begin (), path.end (), '_', '/');
     // ARROWSIGN HACK
     string arrow = "ARROWSIGN/";
-    int i = str.find (arrow);
+    int i = path.find (arrow);
     if (i >= 0) 
-        str [i + 9] = '_';
-    return str;
+        path [i + 9] = '_';
+    return path;
 }
 
 //PID HACK
-coords* get_offset_from_pid (string tile) {
+coords* get_offset_from_pid (const string& tile) {
     coords* c_off = new coords ();
     string p_tile = DATA2_PREFIX + convert_folder_path_to_unix (tile) + string (".PID");
     ifstream f_pid (p_tile.c_str ());

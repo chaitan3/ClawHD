@@ -26,23 +26,29 @@ bounding_box::~bounding_box () {
 void collision_detection (memory_manager* mm, sound_manager *snd, dynamic_tile* claw, vector <dynamic_tile*>* d_tiles) {
     bounding_box* A = claw -> get_bounding_box (); 
     for (auto d_tile: *d_tiles) {
-        //cout << d_tile -> get_image () << endl;
         bounding_box* B = d_tile -> get_bounding_box ();
+        action_tile* attributes = d_tile -> get_tile_attributes ();
+        string image = d_tile -> get_image ();
+
         if (A == B) {
             continue; 
         }
-        if (A -> intersecting (B)) {
-            string image = d_tile -> get_image ();
-            action_tile* attributes = d_tile -> get_tile_attributes ();
+        if (attributes != nullptr) {
+            B -> top_left -> x += attributes -> left;
+            B -> top_left -> y += attributes -> top;
+            B -> bottom_right -> x += attributes -> right;
+            B -> bottom_right -> y += attributes -> bottom;
+            if (A -> intersecting (B)) {
+                cout << image << " " << attributes -> tile_type << endl;
+            }
+        }
+        else if (A -> intersecting (B)) {
             cout << image << endl;
             if (image == "GAME_IMAGES_SOUNDICON") {
                 string anim = d_tile -> get_anim ();    
                 snd -> play_file (anim);
                 mm -> remove_dynamic_tile (d_tile);
             }       
-            if (attributes != NULL) {
-                cout << attributes -> tile_type << endl; 
-            }
         }
     }
 }

@@ -5,9 +5,9 @@
 #include "game.hpp"
 #include "physics.hpp"
 
-#define TILE_SIZE 64
-#define RENDERER_PADDING 50
-#define TEXTURE_FILE_TYPE string(".png")
+const int TILE_SIZE = 64;
+const int RENDERER_PADDING = 50;
+const string TEXTURE_FILE_TYPE = ".png";
 
 class texture {
     public:
@@ -22,9 +22,9 @@ class tile_memory_manager {
     map <string, texture*> textures;
     
     public:
-    texture* get_tile_texture (string);
-    void put_tile_texture (string, texture*);
-    bool contains_tile (string);
+    texture* get_tile_texture (const string&);
+    void put_tile_texture (const string&, texture*);
+    bool contains_tile (const string&);
     ~tile_memory_manager ();
 };
     
@@ -38,8 +38,8 @@ class display {
     coords* plane_indices;
     coords cursor;
     
-    void import_tile_texture (string);
-    bounding_box* copy_tile_to_display (string, coords*, coords*, bool);
+    void import_tile_texture (const string&);
+    bounding_box* copy_tile_to_display (const string&, coords*, coords*, bool);
 
     public:
     vector <dynamic_tile*>* render_screen (memory_manager* , level*, coords*);

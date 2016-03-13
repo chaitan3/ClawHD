@@ -11,7 +11,7 @@ int sound_manager::play_file (string file) {
         }
         string path = SOUNDS_PREFIX + convert_folder_path_to_unix (file) + SOUND_FILE_TYPE;
         this -> waves[file] = Mix_LoadWAV (path.c_str()); 
-        if (this -> waves[file] == NULL) {
+        if (this -> waves[file] == nullptr) {
             cout << "Could not load " << path << endl;
             exit (1);
         }

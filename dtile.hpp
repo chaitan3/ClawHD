@@ -43,16 +43,16 @@ class dynamic_tile {
     void set_bounding_box (bounding_box*);
     int get_z ();
     animation_state* get_animation_state ();
-    dynamic_tile (string, string, string, coords*, int);
-    dynamic_tile (string, coords*, int);
+    dynamic_tile (const string&, const string&, const string&, coords*, int);
+    dynamic_tile (const string&, coords*, int);
     bool x_compare (dynamic_tile*);
     bool y_compare (dynamic_tile*);
     string get_image ();
     string get_name ();
     string get_anim ();
     string get_prev_anim ();
-    void set_anim (string);
-    void reset_anim (string);
+    void set_anim (const string&);
+    void reset_anim (const string&);
     dynamic_tile () {};
 };
 

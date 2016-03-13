@@ -12,11 +12,11 @@ kdtree <dynamic_tile*>* memory_manager::get_dynamic_tiles () {
     return &(this -> d_tiles);
 }
 
-animation* memory_manager::get_animation (string anim) {
+animation* memory_manager::get_animation (const string& anim) {
     if (anim.length() == 0)
-        return NULL;
+        return nullptr;
     if ((anim.find("GAME_SOUND") == 0) || (anim.find("LEVEL") == 0)) {
-        return NULL;
+        return nullptr;
     }
     if (this -> animations.count (anim) == 0) {
         this -> animations [anim] = new animation (anim);
@@ -24,7 +24,7 @@ animation* memory_manager::get_animation (string anim) {
     return this -> animations [anim];
 }
 
-string memory_manager::get_default_image (string image) {
+string memory_manager::get_default_image (const string& image) {
     if (this -> image_list.count (image) == 0)
         return image;
     else
@@ -32,12 +32,12 @@ string memory_manager::get_default_image (string image) {
 }
 
 
-void memory_manager::load_image_list (string image) {
+void memory_manager::load_image_list (const string& image) {
     if (this -> image_list.count (image) == 0)
         this -> image_list [image] = get_directory_list (image);
 }
 
-string memory_manager::get_image_from_list (string image, int frame) {
+string memory_manager::get_image_from_list (const string& image, int frame) {
     int num_images = this -> image_list[image] -> size ();
     return this -> image_list [image] -> at (frame % num_images);
 }

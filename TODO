@@ -12,10 +12,13 @@ AI
 Menu
 
 USE C++11 FEATURES:
-    move 
-    learn pointer management 
+    use const in references
+    avoid pointer use, use & references
     initialization
     reorganize file structure
+
+    use enums
+    move 
 
 Valgrind Memory checks
 Macros for offsets

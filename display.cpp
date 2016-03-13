@@ -9,12 +9,12 @@ display::display() {
     this -> window = SDL_CreateWindow ("Captain Claw",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, this -> width, 
         this -> height, SDL_WINDOW_SHOWN);
-    if (this -> window == NULL) {
+    if (this -> window == nullptr) {
         cout << "Unable to create Window" << endl;
         exit (1);
     }
     this -> renderer = SDL_CreateRenderer (this -> window, -1, SDL_RENDERER_ACCELERATED);
-    if (this -> renderer == NULL) {
+    if (this -> renderer == nullptr) {
         cout << "Unable to create Renderer" << endl;
         exit (1);
     }
@@ -35,7 +35,7 @@ display::~display () {
     SDL_Quit ();
 }
 
-bounding_box* display::copy_tile_to_display (string tile, coords* c_pos, coords* c_off, bool mirrored) {
+bounding_box* display::copy_tile_to_display (const string& tile, coords* c_pos, coords* c_off, bool mirrored) {
     SDL_Rect src, dest;
     SDL_RendererFlip flip = SDL_FLIP_NONE;
     
@@ -63,7 +63,7 @@ bounding_box* display::copy_tile_to_display (string tile, coords* c_pos, coords*
     dest.h = height;
     dest.x = x - c_off -> x;
     dest.y = y - c_off -> y;
-    int ret = SDL_RenderCopyEx (this -> renderer, t_curr -> tx, &src, &dest, 0, NULL, flip);
+    int ret = SDL_RenderCopyEx (this -> renderer, t_curr -> tx, &src, &dest, 0, nullptr, flip);
     if (ret != 0) {
         cout << "Failed to copy texture: " << tile << endl;
         exit (1);
@@ -74,7 +74,7 @@ bounding_box* display::copy_tile_to_display (string tile, coords* c_pos, coords*
     return box;
 }
 
-void display::import_tile_texture (string file) {
+void display::import_tile_texture (const string& file) {
     string t_file = DATA_PREFIX + convert_folder_path_to_unix (file) + TEXTURE_FILE_TYPE;
     // LEVEL1 ACTION 074 HACK
     if (!f_exists (t_file)) {
@@ -82,12 +82,12 @@ void display::import_tile_texture (string file) {
     }
         
     SDL_Surface* surface = IMG_Load (t_file.c_str ());
-    if (surface == NULL) {
+    if (surface == nullptr) {
         cout << "Failed to load surface: " << file << endl;
         exit(1);
     }    
     SDL_Texture* tx = SDL_CreateTextureFromSurface(this -> renderer, surface);
-    if (tx == NULL) {
+    if (tx == nullptr) {
         cout << "Failed to load texture: " << file << endl;
         exit(1);
     }
@@ -183,7 +183,7 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
             string anim = d_tile -> get_anim ();
             animation* a_curr = mm -> get_animation (anim);
             //cout << "display " << d_tile -> get_name () << " " << image << " " << anim << endl;
-            if (a_curr != NULL) {
+            if (a_curr != nullptr) {
                 int frame = a_curr -> get_next_frame (d_tile -> get_animation_state ());
                 if (frame == -1) {
                     d_tile -> reset_anim (d_tile -> get_prev_anim());
@@ -219,15 +219,15 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
     return dynamic_tiles;
 }
 
-texture* tile_memory_manager::get_tile_texture (string tile) {
+texture* tile_memory_manager::get_tile_texture (const string& tile) {
     return this -> textures [tile];
 }
 
-void tile_memory_manager::put_tile_texture (string tile, texture* t_new) {
+void tile_memory_manager::put_tile_texture (const string& tile, texture* t_new) {
     this -> textures [tile] = t_new;
 }
 
-bool tile_memory_manager::contains_tile (string tile) {
+bool tile_memory_manager::contains_tile (const string& tile) {
     return this -> textures.count (tile) > 0;
 }
 
@@ -241,7 +241,7 @@ tile_memory_manager::~tile_memory_manager () {
 
 texture::texture (SDL_Texture* new_tx, coords* c_offset) {
     this -> tx = new_tx;
-    SDL_QueryTexture (this -> tx, NULL, NULL, &(this -> width), &(this -> height));
+    SDL_QueryTexture (this -> tx, nullptr, nullptr, &(this -> width), &(this -> height));
     this -> c_off = c_offset;
 }
 

@@ -16,11 +16,11 @@ class memory_manager {
     void remove_dynamic_tile (dynamic_tile*);
     kdtree <dynamic_tile*>* get_dynamic_tiles ();
     
-    animation* get_animation (string);
+    animation* get_animation (const string&);
     
-    string get_default_image (string);
-    void load_image_list (string);
-    string get_image_from_list(string, int);
+    string get_default_image (const string&);
+    void load_image_list (const string&);
+    string get_image_from_list(const string&, int);
     
     ~memory_manager ();
 };

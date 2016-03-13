@@ -3,7 +3,7 @@
 #include "miniz.h"
 
 
-level::level (string filename, memory_manager* mm) {
+level::level (const string& filename, memory_manager* mm) {
     ifstream f_wwd (filename.c_str(), ios::in | ios::binary);
     
     this -> num_planes = f_read_integer (&f_wwd, 0x8);
@@ -134,7 +134,7 @@ level::level (string filename, memory_manager* mm) {
         string sanim(anim);
 
         dynamic_tile* d_tile = new dynamic_tile (sname, folder_images, sanim, &c_pos, z);
-        if (mm != NULL) {
+        if (mm != nullptr) {
             mm -> load_image_list (folder_images);
             mm -> insert_dynamic_tile (d_tile);
         }

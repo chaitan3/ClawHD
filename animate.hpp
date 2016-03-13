@@ -2,7 +2,7 @@
 #define ANIMATE_H
 #include "util.hpp"
 
-#define ANIMATION_FILE_TYPE string (".ANI")
+const string ANIMATION_FILE_TYPE = ".ANI";
 
 class animation_state {
     public:
@@ -21,7 +21,7 @@ class animation {
     vector <int> duration;
     
     public:
-    animation (string);
+    animation (const string&);
     int get_next_frame (animation_state*);
 };
 

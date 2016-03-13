@@ -39,7 +39,7 @@ class level {
     char* get_compressed_data (ifstream*, int, int);
     
     public:
-    level (string, memory_manager*);
+    level (const string&, memory_manager*);
     ~level ();
     int get_num_planes ();
     coords* get_start_location ();

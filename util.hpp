@@ -14,24 +14,24 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
 
-//PID HACK
-#define DATA_PREFIX string ("images/")
-#define DATA2_PREFIX string ("rez/")
-#define SOUNDS_PREFIX string ("sounds/")
-
-#define SEPARATOR string ("/")
-
 using namespace std;
 
-void save_to_file (string, char*, int);
+//PID HACK
+const string DATA_PREFIX = "images/";
+const string DATA2_PREFIX = "rez/";
+const string SOUNDS_PREFIX = "sounds/";
+
+const string SEPARATOR = "/";
+
+void save_to_file (const string&, char*, int);
 int f_read_integer (ifstream *, int );
 int f_read_short_int (ifstream *, int);
 string convert_to_three_digits (int);
 string convert_int_to_string (int);
-bool f_exists (string);
+bool f_exists (const string&);
 string f_read_path (ifstream *, int, int);
-string convert_folder_path_to_unix (string);
-vector <string>* get_directory_list (string);
+string convert_folder_path_to_unix (const string&);
+vector <string>* get_directory_list (const string&);
 
 class coords {
     public:
@@ -41,6 +41,6 @@ class coords {
     coords (int, int);
 };
 
-coords* get_offset_from_pid (string);
+coords* get_offset_from_pid (const string&);
 
 #endif

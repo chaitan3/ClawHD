@@ -27,7 +27,7 @@
 #include "sound.hpp"
 #include "display.hpp"
 
-#define CLAW "CLAW_IMAGES"
+const string CLAW = "CLAW_IMAGES";
 
 int main (int argc, char **argv)
 {   
@@ -53,7 +53,7 @@ int main (int argc, char **argv)
     int latency = 10;
     int count;
     const uint8_t* key_state;
-    const uint8_t* prev_key_state = NULL;
+    const uint8_t* prev_key_state = nullptr;
     
     while (1) {
         while (SDL_PollEvent (&event));
