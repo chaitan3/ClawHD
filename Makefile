@@ -3,25 +3,27 @@ CC = g++
 CFLAGS = -Wall -g -std=c++11
 LFLAGS = -g
 LIBS =  -lSDL2 -lSDL2_image -lSDL2_mixer
-
-OBJ = util.o level.o display.o miniz.o animate.o dtile.o sound.o physics.o
+SRC = src
+OBJ = build
+SOURCES = $(notdir $(wildcard $(SRC)/*.cpp))
+OBJECTS = $(addprefix $(OBJ)/,$(SOURCES:%.cpp=%.o))
 TARGET = ./claw
-TARGETOBJ = main.o $(OBJ)
 ERRORS = errors.out
 
 all: $(TARGET)
 
-%.o: %.cpp
-	$(CC) $(CFLAGS) -c $^
 
-$(TARGET): $(TARGETOBJ)
-	$(CC) $(LFLAGS) $^ -o $@ $(LIBS)
+$(TARGET): $(OBJ) $(OBJECTS)
+	$(CC) $(LFLAGS) $(OBJECTS) -o $@ $(LIBS)
 
-test: test.o $(OBJ)
-	$(CC) $(LFLAGS) $^ -o $@ $(LIBS)
+$(OBJ):
+	mkdir $(OBJ)
+
+$(OBJ)/%.o: $(SRC)/%.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
 
 clean:
-	rm -f $(TARGETOBJ) $(TARGET)
+	rm -rf $(OBJECTS) $(OBJ) $(TARGET)
 
 memtest:
 	valgrind --tool=memcheck --leak-check=full $(TARGET) > $(ERRORS) 2>&1
