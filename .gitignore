@@ -1,4 +1,8 @@
 *.o
-test
 claw
 errors.out
+
+images
+sounds
+rez
+tools
