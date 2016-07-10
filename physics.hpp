@@ -1,7 +1,6 @@
 #ifndef PHYSICS_HPP
 #define PHYSICS_HPP
 #include "util.hpp"
-#include "sound.hpp"
 
 class bounding_box {
     public:
@@ -16,6 +15,6 @@ class bounding_box {
 class dynamic_tile;
 class memory_manager;
 
-void collision_detection (memory_manager*, sound_manager*, dynamic_tile*, vector <dynamic_tile*>*);
+void collision_detection (memory_manager*, dynamic_tile*, vector <dynamic_tile*>*);
 
 #endif

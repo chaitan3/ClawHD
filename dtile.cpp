@@ -1,4 +1,18 @@
 #include "dtile.hpp"
+#include "memory.hpp"
+
+void memory_manager::insert_dynamic_tile (dynamic_tile* d_tile) {
+    this -> d_tiles.insert (d_tile);
+}
+
+void memory_manager::remove_dynamic_tile (dynamic_tile* d_tile) {
+    this -> d_tiles.remove (d_tile);
+}
+
+kdtree <dynamic_tile*>* memory_manager::get_dynamic_tiles () {
+    return &(this -> d_tiles);
+}
+
 
 bool dynamic_tile::x_compare (dynamic_tile* right_operand) {
     coords* c_right = right_operand -> get_coords ();

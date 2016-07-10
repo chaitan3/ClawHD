@@ -21,9 +21,9 @@ bounding_box::~bounding_box () {
     delete this-> bottom_right;
 }
 
-#include "game.hpp"
+#include "memory.hpp"
 
-void collision_detection (memory_manager* mm, sound_manager *snd, dynamic_tile* claw, vector <dynamic_tile*>* d_tiles) {
+void collision_detection (memory_manager* mm, dynamic_tile* claw, vector <dynamic_tile*>* d_tiles) {
     bounding_box* A = claw -> get_bounding_box (); 
     for (auto d_tile: *d_tiles) {
         bounding_box* B = d_tile -> get_bounding_box ();
@@ -46,7 +46,7 @@ void collision_detection (memory_manager* mm, sound_manager *snd, dynamic_tile* 
             cout << image << endl;
             if (image == "GAME_IMAGES_SOUNDICON") {
                 string anim = d_tile -> get_anim ();    
-                snd -> play_file (anim);
+                mm -> sound_play_file (anim);
                 mm -> remove_dynamic_tile (d_tile);
             }       
         }

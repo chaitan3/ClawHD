@@ -1,19 +1,19 @@
+Physics:
+    reorganize response
 Bugs:
     Plane movement speed
     Read PID files directly
-    function call without variable use?
     change name to logic
 Features:
     rebalancing kdtree
     decouple action and animation
-Sound
-Physics
 AI
 Menu
 
 USE C++11 FEATURES:
     use const in references
-    avoid pointer use, use & references
+    unique_ptr
+    returning references or pointers
     initialization
     reorganize file structure
 

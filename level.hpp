@@ -1,7 +1,7 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 #include "util.hpp"
-#include "game.hpp"
+#include "memory.hpp"
 
 class plane {
     int height;
@@ -21,6 +21,7 @@ class plane {
     set <int> get_unique_tiles ();
     tuple<int, int> get_dimensions ();
     tuple<int, int> get_movement_speeds ();
+
     int get_z();
     plane (int, int, int, int, int, int, int, int32_t);
     ~plane ();

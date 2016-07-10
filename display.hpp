@@ -2,7 +2,7 @@
 #define DISPLAY_H
 #include "util.hpp"
 #include "level.hpp"
-#include "game.hpp"
+#include "memory.hpp"
 #include "physics.hpp"
 
 const int TILE_SIZE = 64;
@@ -16,29 +16,22 @@ class texture {
     int width, height;
     
     texture (SDL_Texture*, coords*);
+    ~texture ();
 };
 
-class tile_memory_manager {
-    map <string, texture*> textures;
-    
-    public:
-    texture* get_tile_texture (const string&);
-    void put_tile_texture (const string&, texture*);
-    bool contains_tile (const string&);
-    ~tile_memory_manager ();
-};
-    
 class display {
     SDL_Window* window;
     SDL_Renderer* renderer;
-    tile_memory_manager tmm;
     int height;
     int width;
     coords* plane_cursors;
     coords* plane_indices;
     coords cursor;
-    
+    map <string, texture*> textures;
+
+    texture* get_tile_texture (const string&);
     void import_tile_texture (const string&);
+    bool contains_tile (const string&);
     bounding_box* copy_tile_to_display (const string&, coords*, coords*, bool);
 
     public:

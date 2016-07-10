@@ -23,8 +23,7 @@
 
 #include "util.hpp"
 #include "level.hpp"
-#include "game.hpp"
-#include "sound.hpp"
+#include "memory.hpp"
 #include "display.hpp"
 
 const string CLAW = "CLAW_IMAGES";
@@ -33,13 +32,11 @@ int main (int argc, char **argv)
 {   
     display disp;
     memory_manager mm;
-    sound_manager snd;
 
     string l_curr_str = "1";
     if (argc > 1) {
         l_curr_str = string(argv[1]);
     }
-    snd.level = l_curr_str;
     level l_curr (DATA2_PREFIX + "LEVEL" + l_curr_str + "/WORLDS/WORLD.WWD", &mm);
     coords* start_state = l_curr.get_start_location ();
     dynamic_tile* d_claw = new dynamic_tile ("Captain Claw", CLAW, "CLAW_ANIS_STAND", start_state, 8999);
@@ -66,13 +63,13 @@ int main (int argc, char **argv)
             if (key_state [SDL_SCANCODE_LCTRL]) {
                 if (anim != "CLAW_ANIS_SWIPE") {
                     d_claw -> set_anim ("CLAW_ANIS_SWIPE");
-                    snd.play_file ("CLAW_SOUNDS_SWORDSWISH");
+                    mm.sound_play_file ("CLAW_SOUNDS_SWORDSWISH");
                 }
             }
             else if (key_state [SDL_SCANCODE_LALT]) {
                 if (anim != "CLAW_ANIS_PISTOL") {
                     d_claw -> set_anim ("CLAW_ANIS_PISTOL");
-                    snd.play_file ("CLAW_SOUNDS_GUNSHOT");
+                    mm.sound_play_file ("CLAW_SOUNDS_GUNSHOT");
                 }
             }
         }
@@ -121,7 +118,7 @@ int main (int argc, char **argv)
         }
 
         vector <dynamic_tile*>* interior_tiles = disp.render_screen (&mm, &l_curr, state);
-        collision_detection (&mm, &snd, d_claw, interior_tiles);
+        collision_detection (&mm, d_claw, interior_tiles);
         delete interior_tiles;
 
         SDL_Delay (latency);

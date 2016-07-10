@@ -29,6 +29,7 @@ display::display() {
 }
 
 display::~display () {
+    delete_map_objects (this -> textures);
     Mix_CloseAudio ();
     SDL_DestroyRenderer (this -> renderer);
     SDL_DestroyWindow (this -> window);
@@ -39,9 +40,9 @@ bounding_box* display::copy_tile_to_display (const string& tile, coords* c_pos, 
     SDL_Rect src, dest;
     SDL_RendererFlip flip = SDL_FLIP_NONE;
     
-    if (!(this -> tmm.contains_tile (tile)))
+    if (!(this -> contains_tile (tile)))
         this -> import_tile_texture (tile);
-    texture* t_curr = this -> tmm.get_tile_texture (tile);
+    texture* t_curr = this -> get_tile_texture (tile);
 
     int width = t_curr -> width;
     int height = t_curr -> height;
@@ -93,7 +94,7 @@ void display::import_tile_texture (const string& file) {
     }
     coords* c_off = get_offset_from_pid (file);
     cout << "texture " << file << " " << c_off -> x << " " << c_off -> y << endl;
-    this -> tmm.put_tile_texture (file, new texture (tx, c_off));
+    this -> textures [file] = new texture (tx, c_off);
     
     SDL_FreeSurface (surface);
 }
@@ -219,24 +220,12 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
     return dynamic_tiles;
 }
 
-texture* tile_memory_manager::get_tile_texture (const string& tile) {
+texture* display::get_tile_texture (const string& tile) {
     return this -> textures [tile];
 }
 
-void tile_memory_manager::put_tile_texture (const string& tile, texture* t_new) {
-    this -> textures [tile] = t_new;
-}
-
-bool tile_memory_manager::contains_tile (const string& tile) {
+bool display::contains_tile (const string& tile) {
     return this -> textures.count (tile) > 0;
-}
-
-tile_memory_manager::~tile_memory_manager () {
-    for (auto& it: this -> textures) {
-        SDL_DestroyTexture (it.second -> tx);
-        delete it.second -> c_off;
-        delete it.second;
-    }
 }
 
 texture::texture (SDL_Texture* new_tx, coords* c_offset) {
@@ -245,4 +234,8 @@ texture::texture (SDL_Texture* new_tx, coords* c_offset) {
     this -> c_off = c_offset;
 }
 
+texture::~texture () {
+    SDL_DestroyTexture (this -> tx);
+    delete this -> c_off;
+}
 

@@ -16,6 +16,13 @@
 
 using namespace std;
 
+template<class T> 
+void delete_map_objects (T obj) {
+    for (auto& i: obj) {
+            delete i.second; 
+        }
+}
+
 //PID HACK
 const string DATA_PREFIX = "images/";
 const string DATA2_PREFIX = "rez/";

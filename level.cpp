@@ -134,10 +134,8 @@ level::level (const string& filename, memory_manager* mm) {
         string sanim(anim);
 
         dynamic_tile* d_tile = new dynamic_tile (sname, folder_images, sanim, &c_pos, z);
-        if (mm != nullptr) {
-            mm -> load_image_list (folder_images);
-            mm -> insert_dynamic_tile (d_tile);
-        }
+        mm -> load_image_list (folder_images);
+        mm -> insert_dynamic_tile (d_tile);
     }
     
     int num_action_tiles;

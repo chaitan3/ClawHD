@@ -1,4 +1,5 @@
 #include "animate.hpp"
+#include "memory.hpp"
 
 animation::animation (const string& anim_file) {
     string a_file = DATA2_PREFIX + convert_folder_path_to_unix (anim_file) +
@@ -58,4 +59,34 @@ animation_state::animation_state () {
 void animation_state::reset () {
     this -> frame = -1;
     this -> last_update_time = -0xFF;
+}
+
+animation* memory_manager::get_animation (const string& anim) {
+    if (anim.length() == 0)
+        return nullptr;
+    if ((anim.find("GAME_SOUND") == 0) || (anim.find("LEVEL") == 0)) {
+            return nullptr;
+        }
+    if (this -> animations.count (anim) == 0) {
+            this -> animations [anim] = new animation (anim);
+        }
+    return this -> animations [anim];
+}
+
+string memory_manager::get_default_image (const string& image) {
+    if (this -> animation_image_list.count (image) == 0)
+        return image;
+    else
+        return this -> animation_image_list [image] -> at (0);
+}
+
+
+void memory_manager::load_image_list (const string& image) {
+    if (this -> animation_image_list.count (image) == 0)
+        this -> animation_image_list [image] = get_directory_list (image);
+}
+
+string memory_manager::get_image_from_list (const string& image, int frame) {
+    int num_images = this -> animation_image_list[image] -> size ();
+    return this -> animation_image_list [image] -> at (frame % num_images);
 }
