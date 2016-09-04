@@ -37,6 +37,7 @@ int main (int argc, char **argv)
     if (argc > 1) {
         l_curr_str = string(argv[1]);
     }
+    mm.l_curr = l_curr_str;
     level l_curr (DATA2_PREFIX + "LEVEL" + l_curr_str + "/WORLDS/WORLD.WWD", &mm);
     coords* start_state = l_curr.get_start_location ();
     dynamic_tile* d_claw = new dynamic_tile ("Captain Claw", CLAW, "CLAW_ANIS_STAND", start_state, 8999);

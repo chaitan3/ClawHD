@@ -13,6 +13,7 @@ class memory_manager {
     map <string, Mix_Chunk*> waves;    
     
     public:
+    string l_curr;
 
     void insert_dynamic_tile (dynamic_tile*);
     void remove_dynamic_tile (dynamic_tile*);
