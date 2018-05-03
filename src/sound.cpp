@@ -9,7 +9,7 @@ int memory_manager::sound_play_file (const string& c_file) {
         if (file.find("LEVEL") == 0) {
             file.insert(5, this -> l_curr + string("/SOUNDS"));
         }
-        string path = SOUNDS_PREFIX + convert_folder_path_to_unix (file) + SOUND_FILE_TYPE;
+        string path = DATA_PREFIX + convert_folder_path_to_unix (file) + SOUND_FILE_TYPE;
         this -> waves[file] = Mix_LoadWAV (path.c_str()); 
         if (this -> waves[file] == nullptr) {
             cout << "Could not load " << path << endl;

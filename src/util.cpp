@@ -10,7 +10,14 @@ void save_to_file (const string& filename, char* ptr_data, int len) {
    file.close ();
 }
 
-int32_t f_read_integer (ifstream *file, int offset) {
+int f_read_byte (ifstream *file, int offset) {
+    uint8_t val;
+    file -> seekg (offset, ios::beg);
+    file -> read ((char *) &val, sizeof (val));
+    return val;
+}
+
+int f_read_integer (ifstream *file, int offset) {
     uint32_t val;
     file -> seekg (offset, ios::beg);
     file -> read ((char *) &val, sizeof (val));
@@ -94,7 +101,7 @@ string convert_folder_path_to_unix (const string& str) {
 //PID HACK
 coords* get_offset_from_pid (const string& tile) {
     coords* c_off = new coords ();
-    string p_tile = DATA2_PREFIX + convert_folder_path_to_unix (tile) + string (".PID");
+    string p_tile = DATA_PREFIX + convert_folder_path_to_unix (tile) + string (".PID");
     ifstream f_pid (p_tile.c_str ());
     if (f_pid.is_open ()) {
         c_off -> x = f_read_integer (&f_pid, 16);

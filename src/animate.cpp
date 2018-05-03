@@ -2,7 +2,7 @@
 #include "memory.hpp"
 
 animation::animation (const string& anim_file) {
-    string a_file = DATA2_PREFIX + convert_folder_path_to_unix (anim_file) +
+    string a_file = DATA_PREFIX + convert_folder_path_to_unix (anim_file) +
         ANIMATION_FILE_TYPE;
     
     ifstream f_ani (a_file.c_str ());

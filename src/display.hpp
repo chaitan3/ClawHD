@@ -7,7 +7,7 @@
 
 const int TILE_SIZE = 64;
 const int RENDERER_PADDING = 50;
-const string TEXTURE_FILE_TYPE = ".png";
+const string TEXTURE_FILE_TYPE = ".PID";
 
 class texture {
     public:

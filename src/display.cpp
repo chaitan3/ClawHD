@@ -1,6 +1,145 @@
 #include "display.hpp"
 #include "dtile.hpp"
 
+class Color {
+    public:
+        int r, g, b, a;
+        Color(int r, int g, int b, int a=0) {
+            this -> r = r;
+            this -> g = g;
+            this -> b = b;
+            this -> a = a;
+        }
+};
+
+
+void fillPixel(SDL_Surface* buf, int x, int y, Color* c) {
+    int32_t* offset = ((int32_t*)buf->pixels) + y*buf->pitch + x;
+    *offset = c->r + (c->g << 8) + (c->b << 16) + (c->a << 24);
+}
+
+SDL_Surface* PID_Load(const string& file) {
+    SDL_Surface *surface = nullptr;
+    
+    // Parse info
+    ifstream data(file.c_str(), ios::binary);
+    if (!data.is_open()) {
+        cout << "Failed to open file: " << file << endl;
+        return surface;
+    }
+
+    int fsize = data.tellg();
+    data.seekg( 0, std::ios::end );
+    int len = data.tellg() - fsize;
+    data.seekg(0);
+    
+    // Flags
+    int flags = f_read_integer(&data, 4);
+    bool transparent = (flags & 1) == 1;
+    bool rle = (flags & 32) == 32;
+    bool ownPalette = (flags & 128) == 128;
+    
+    // Extract offset
+    //coords fOffset(f_read_integer(data, 16), f_read_integer(data, 20));
+    
+    if (!ownPalette) {
+        cout << "not own pallete" << endl;
+        return surface;
+    }
+    
+    // Extract dimensions
+    int w = f_read_integer(&data, 8);
+    int h = f_read_integer(&data, 12);
+    int rmask, gmask, bmask, amask;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    rmask = 0xff000000;
+    gmask = 0x00ff0000;
+    bmask = 0x0000ff00;
+    amask = 0x000000ff;
+#else
+    rmask = 0x000000ff;
+    gmask = 0x0000ff00;
+    bmask = 0x00ff0000;
+    amask = 0xff000000;
+#endif
+
+    surface = SDL_CreateRGBSurface(0, w, h, 32,
+                                   rmask, gmask, bmask, amask);
+    // Create a new image buffer to fill with pixels
+    SDL_LockSurface(surface);
+    
+    // Extract palette
+    Color* palette[256];
+    // Read
+    int n = 0;
+    for (int i = len - 768; i < len; i+= 3) {
+            int r = f_read_byte(&data, i);
+            int g = f_read_byte(&data, i + 1);
+            int b = f_read_byte(&data, i + 2);
+            if (r == 255 && g == 0 && b == 132) palette[n] = new Color(0, 0, 0, 0);
+            else if (r == 252 && g == 2 && b == 132) palette[n] = new Color(0, 0, 0, 0);
+            else palette[n] = new Color(r, g, b);
+            n++;
+    }
+    
+    n = 32;
+    int x = 0;
+    int y = 0;
+    if (rle) {
+            while (y < h) {
+                    int b = f_read_byte(&data, n);
+                    n++;
+                    if (b > 128) {
+                            int i = b - 128;
+                            while (i-- > 0 && y < h) {
+                                    fillPixel(surface, x, y, new Color(0, 0, 0, transparent ? 0: 1));
+                                    x++;
+                                    if (x == w) {
+                                            x = 0;
+                                            y++;
+                                    }
+                            }
+                    } else {
+                            int i = b;
+                            while (i-- > 0 && y < h) {
+                                    b = f_read_byte(&data, n);
+                                    n++;
+                                    fillPixel(surface, x, y, palette[b]);
+                                    x++;
+                                    if (x == w) {
+                                            x = 0;
+                                            y++;
+                                    }
+                            }
+                    }
+            }
+    } else {
+            while (y < h) {
+                    int b = f_read_byte(&data, n);
+                    n++;
+                    int i;
+                    if (b > 192) {
+                            i = b - 192;
+                            b = f_read_byte(&data, n);
+                            n++;
+                    } else {
+                            i = 1;
+                    }
+                    while (i-- > 0 && y < h) {fillPixel(surface, x, y, palette[b]);
+                            x++;
+                            if (x == w) {
+                                    x = 0;
+                                    y++;
+                            }
+                    }
+            }
+    }
+    SDL_UnlockSurface(surface);
+
+    delete[] palette;
+    return surface;
+}
+
 display::display() {
     this -> height = 600;
     this -> width = 1000;
@@ -82,9 +221,11 @@ void display::import_tile_texture (const string& file) {
         t_file.erase (remove (t_file.begin (), t_file.end (), '0'), t_file.end ());
     }
         
-    SDL_Surface* surface = IMG_Load (t_file.c_str ());
+    //SDL_Surface* surface = IMG_Load (t_file.c_str ());
+    SDL_Surface* surface = PID_Load(t_file);
     if (surface == nullptr) {
         cout << "Failed to load surface: " << file << endl;
+        cout << "Filename: " << t_file << endl;
         exit(1);
     }    
     SDL_Texture* tx = SDL_CreateTextureFromSurface(this -> renderer, surface);
