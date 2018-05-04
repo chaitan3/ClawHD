@@ -28,6 +28,8 @@ class display {
     coords* plane_indices;
     coords cursor;
     map <string, texture*> textures;
+    level* l1;
+    SDL_Surface* PID_Load(const string& file);
 
     texture* get_tile_texture (const string&);
     void import_tile_texture (const string&);

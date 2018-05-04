@@ -49,4 +49,21 @@ class coords {
 
 coords* get_offset_from_pid (const string&);
 
+class Color {
+    public:
+        int32_t r, g, b, a;
+        Color(int r, int g, int b, int a=0) {
+            this -> r = r;
+            this -> g = g;
+            this -> b = b;
+            this -> a = a;
+        }
+        Color() {
+            this -> r = 0;
+            this -> g = 0;
+            this -> b = 0;
+            this -> a = 0;
+        }
+};
+
 #endif

@@ -21,6 +21,7 @@ int f_read_integer (ifstream *file, int offset) {
     uint32_t val;
     file -> seekg (offset, ios::beg);
     file -> read ((char *) &val, sizeof (val));
+    //printf("integer: %x %d\n", val, offset);
     return val;
 }
 

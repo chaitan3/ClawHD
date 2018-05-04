@@ -40,6 +40,8 @@ class level {
     char* get_compressed_data (ifstream*, int, int);
     
     public:
+    Color palette[256];
+
     level (const string&, memory_manager*);
     ~level ();
     int get_num_planes ();

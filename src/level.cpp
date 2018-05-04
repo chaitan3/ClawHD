@@ -184,6 +184,24 @@ level::level (const string& filename, memory_manager* mm) {
     }
 
     delete[] inflated_data;
+    string palette_file = DATA_PREFIX + "LEVEL" + mm->l_curr + "/PALETTES/MAIN.PAL";
+    ifstream palette_data(palette_file.c_str(), ios::binary);
+    if (!palette_data.is_open()) {
+        cout << "palette data not found "  << palette_file << endl;
+        exit(1);
+    }
+    int n = 0;
+    for (int i = 0; i < 768; i+= 3) {
+            int r = f_read_byte(&palette_data, i);
+            int g = f_read_byte(&palette_data, i + 1);
+            int b = f_read_byte(&palette_data, i + 2);
+            if (r == 255 && g == 0 && b == 132) palette[n] = Color(0, 0, 0, 0);
+            else if (r == 252 && g == 2 && b == 132) palette[n] = Color(0, 0, 0, 0);
+            else palette[n] = Color(r, g, b);
+            n++;
+    }
+    palette_data.close();
+
     //exit(1);
 }
 

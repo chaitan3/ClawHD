@@ -1,7 +1,7 @@
 #include "util.hpp"
 #include "memory.hpp"
 
-const string SOUND_FILE_TYPE = ".wav";
+const string SOUND_FILE_TYPE = ".WAV";
 
 int memory_manager::sound_play_file (const string& c_file) {
     string file = c_file;

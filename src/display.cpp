@@ -1,24 +1,13 @@
 #include "display.hpp"
 #include "dtile.hpp"
 
-class Color {
-    public:
-        int r, g, b, a;
-        Color(int r, int g, int b, int a=0) {
-            this -> r = r;
-            this -> g = g;
-            this -> b = b;
-            this -> a = a;
-        }
-};
 
-
-void fillPixel(SDL_Surface* buf, int x, int y, Color* c) {
-    int32_t* offset = ((int32_t*)buf->pixels) + y*buf->pitch + x;
-    *offset = c->r + (c->g << 8) + (c->b << 16) + (c->a << 24);
+void fillPixel(SDL_Surface* buf, int x, int y, const Color& c) {
+    int32_t* offset = (int32_t*)(buf->pixels + y*buf->pitch + x*4);
+    *offset = c.r + (c.g << 8) + (c.b << 16) + (c.a << 24);
 }
 
-SDL_Surface* PID_Load(const string& file) {
+SDL_Surface* display::PID_Load(const string& file) {
     SDL_Surface *surface = nullptr;
     
     // Parse info
@@ -29,23 +18,19 @@ SDL_Surface* PID_Load(const string& file) {
     }
 
     int fsize = data.tellg();
-    data.seekg( 0, std::ios::end );
+    data.seekg( 0, ios::end );
     int len = data.tellg() - fsize;
-    data.seekg(0);
+    data.seekg(0, ios::beg);
     
     // Flags
     int flags = f_read_integer(&data, 4);
     bool transparent = (flags & 1) == 1;
     bool rle = (flags & 32) == 32;
     bool ownPalette = (flags & 128) == 128;
+    printf("%d %d %d\n", transparent, rle, ownPalette);
     
     // Extract offset
     //coords fOffset(f_read_integer(data, 16), f_read_integer(data, 20));
-    
-    if (!ownPalette) {
-        cout << "not own pallete" << endl;
-        return surface;
-    }
     
     // Extract dimensions
     int w = f_read_integer(&data, 8);
@@ -69,17 +54,22 @@ SDL_Surface* PID_Load(const string& file) {
     SDL_LockSurface(surface);
     
     // Extract palette
-    Color* palette[256];
-    // Read
+    Color* palette = nullptr;
     int n = 0;
-    for (int i = len - 768; i < len; i+= 3) {
-            int r = f_read_byte(&data, i);
-            int g = f_read_byte(&data, i + 1);
-            int b = f_read_byte(&data, i + 2);
-            if (r == 255 && g == 0 && b == 132) palette[n] = new Color(0, 0, 0, 0);
-            else if (r == 252 && g == 2 && b == 132) palette[n] = new Color(0, 0, 0, 0);
-            else palette[n] = new Color(r, g, b);
-            n++;
+    // Read
+    if (!ownPalette) {
+        palette = this -> l1 -> palette;
+    } else {
+        palette = new Color[256];
+        for (int i = len - 768; i < len; i+= 3) {
+                int r = f_read_byte(&data, i);
+                int g = f_read_byte(&data, i + 1);
+                int b = f_read_byte(&data, i + 2);
+                if (r == 255 && g == 0 && b == 132) palette[n] = Color(0, 0, 0, 0);
+                else if (r == 252 && g == 2 && b == 132) palette[n] = Color(0, 0, 0, 0);
+                else palette[n] = Color(r, g, b);
+                n++;
+        }
     }
     
     n = 32;
@@ -92,7 +82,7 @@ SDL_Surface* PID_Load(const string& file) {
                     if (b > 128) {
                             int i = b - 128;
                             while (i-- > 0 && y < h) {
-                                    fillPixel(surface, x, y, new Color(0, 0, 0, transparent ? 0: 1));
+                                    fillPixel(surface, x, y, Color(0, 0, 0, transparent ? 0: 1));
                                     x++;
                                     if (x == w) {
                                             x = 0;
@@ -135,8 +125,10 @@ SDL_Surface* PID_Load(const string& file) {
             }
     }
     SDL_UnlockSurface(surface);
+    if (ownPalette) {
+        delete palette;
+    }
 
-    delete[] palette;
     return surface;
 }
 
@@ -222,7 +214,7 @@ void display::import_tile_texture (const string& file) {
     }
         
     //SDL_Surface* surface = IMG_Load (t_file.c_str ());
-    SDL_Surface* surface = PID_Load(t_file);
+    SDL_Surface* surface = this->PID_Load(t_file);
     if (surface == nullptr) {
         cout << "Failed to load surface: " << file << endl;
         cout << "Filename: " << t_file << endl;
@@ -252,6 +244,8 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
     vector <dynamic_tile*>* visible_tiles = mm -> get_dynamic_tiles () -> range_search (&c_top_left, &c_bottom_right);
     vector <dynamic_tile*>* dynamic_tiles = new vector<dynamic_tile*>(*visible_tiles);
     vector <dynamic_tile*> static_tiles;
+
+    this -> l1 = l_current;
     
     // Assume Claw at center of screen
     // Render static tiles
