@@ -1,5 +1,5 @@
 #CC = clang++
-CC = g++
+CC = ccache g++
 CFLAGS = -Wall -g -std=c++11
 LFLAGS = -g
 LIBS =  -lSDL2 -lSDL2_image -lSDL2_mixer

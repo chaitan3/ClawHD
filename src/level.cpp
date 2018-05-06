@@ -195,8 +195,11 @@ level::level (const string& filename, memory_manager* mm) {
             int r = f_read_byte(&palette_data, i);
             int g = f_read_byte(&palette_data, i + 1);
             int b = f_read_byte(&palette_data, i + 2);
-            if (r == 255 && g == 0 && b == 132) palette[n] = Color(0, 0, 0, 0);
-            else if (r == 252 && g == 2 && b == 132) palette[n] = Color(0, 0, 0, 0);
+            //if (r == 255 && g == 0 && b == 132) palette[n] = Color(0, 0, 0, 0);
+            //else if (r == 252 && g == 2 && b == 132) palette[n] = Color(0, 0, 0, 0);
+            //else if (r == 0 && g == 0 && b == 0) palette[n] = Color(0, 0, 0, 0);
+            if (0) palette[n] = Color(0, 0, 0, 0);
+            //else if (r == 0 && g == 0 && b == 0) palette[n] = Color(0, 0, 0, 0);
             else palette[n] = Color(r, g, b);
             n++;
     }

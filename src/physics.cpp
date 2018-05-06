@@ -39,11 +39,11 @@ void collision_detection (memory_manager* mm, dynamic_tile* claw, vector <dynami
             B -> bottom_right -> x += attributes -> right;
             B -> bottom_right -> y += attributes -> bottom;
             if (A -> intersecting (B)) {
-                cout << image << " " << attributes -> tile_type << endl;
+                //cout << image << " " << attributes -> tile_type << endl;
             }
         }
         else if (A -> intersecting (B)) {
-            cout << image << endl;
+            //cout << image << endl;
             if (image == "GAME_IMAGES_SOUNDICON") {
                 string anim = d_tile -> get_anim ();    
                 mm -> sound_play_file (anim);

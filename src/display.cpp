@@ -27,7 +27,12 @@ SDL_Surface* display::PID_Load(const string& file) {
     bool transparent = (flags & 1) == 1;
     bool rle = (flags & 32) == 32;
     bool ownPalette = (flags & 128) == 128;
-    printf("%d %d %d\n", transparent, rle, ownPalette);
+    if (rle || transparent || ownPalette) {
+        printf("%d %d %d\n", transparent, rle, ownPalette);
+        //exit(1);
+    }
+    //transparent = rle;
+    if (rle) transparent = true;
     
     // Extract offset
     //coords fOffset(f_read_integer(data, 16), f_read_integer(data, 20));
@@ -52,6 +57,12 @@ SDL_Surface* display::PID_Load(const string& file) {
                                    rmask, gmask, bmask, amask);
     // Create a new image buffer to fill with pixels
     SDL_LockSurface(surface);
+    //SDL_FillRect(surface, NULL, 0);
+    //for (int i = 0; i < w; i++) {
+    //    for (int j = 0; j < h; j++) {
+    //        fillPixel(surface, i, j, Color(0,0,0,0));
+    //    }
+    //}
     
     // Extract palette
     Color* palette = nullptr;
@@ -82,7 +93,7 @@ SDL_Surface* display::PID_Load(const string& file) {
                     if (b > 128) {
                             int i = b - 128;
                             while (i-- > 0 && y < h) {
-                                    fillPixel(surface, x, y, Color(0, 0, 0, transparent ? 0: 1));
+                                    fillPixel(surface, x, y, Color(0, 0, 0, transparent ? 0: 255));
                                     x++;
                                     if (x == w) {
                                             x = 0;
@@ -115,7 +126,12 @@ SDL_Surface* display::PID_Load(const string& file) {
                     } else {
                             i = 1;
                     }
-                    while (i-- > 0 && y < h) {fillPixel(surface, x, y, palette[b]);
+                    while (i-- > 0 && y < h) {
+                            Color c = palette[b];
+                            if (c.r == 0 && c.g == 0 && c.b == 0) {
+                                c.a = transparent ? 0 : 255;
+                            }
+                            fillPixel(surface, x, y, c);
                             x++;
                             if (x == w) {
                                     x = 0;
