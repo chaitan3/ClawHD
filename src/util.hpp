@@ -38,6 +38,7 @@ bool f_exists (const string&);
 string f_read_path (ifstream *, int, int);
 string convert_folder_path_to_unix (const string&);
 vector <string>* get_directory_list (const string&);
+int true_mod(int, int);
 
 class coords {
     public:

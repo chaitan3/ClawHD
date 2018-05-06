@@ -167,7 +167,6 @@ display::display() {
     }
     SDL_RenderClear (renderer);
     this -> plane_cursors = new coords[3];
-    this -> plane_indices = new coords[3];
 
     if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1) {
         cout << "Unable to initialize Audio" << endl;
@@ -250,13 +249,13 @@ void display::import_tile_texture (const string& file) {
 
 vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_current, coords* c_pos) {
     coords c_draw_pos;
-    int top = c_pos -> y - this -> height / 2;
-    int left = c_pos -> x - this -> width / 2;
-    static int prev_top = top;
-    static int prev_left = left;
+    coords center = *c_pos;
+    //printf("%d %d\n", center.x, center.y);
+    coords top_left (center.x - this->width/2, center.y - this->height/2);
+    static coords prev_center = center;
 
-    coords c_top_left (left - RENDERER_PADDING, top - RENDERER_PADDING);
-    coords c_bottom_right (left + this -> width + RENDERER_PADDING, top + this -> height + RENDERER_PADDING);
+    coords c_top_left (top_left.x - RENDERER_PADDING, top_left.y - RENDERER_PADDING);
+    coords c_bottom_right (top_left.x + this -> width + RENDERER_PADDING, top_left.y + this -> height + RENDERER_PADDING);
     vector <dynamic_tile*>* visible_tiles = mm -> get_dynamic_tiles () -> range_search (&c_top_left, &c_bottom_right);
     vector <dynamic_tile*>* dynamic_tiles = new vector<dynamic_tile*>(*visible_tiles);
     vector <dynamic_tile*> static_tiles;
@@ -274,24 +273,23 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
 
         int i_start, j_start;
         if (this -> plane_cursors[k].y < 0) {
-            this -> plane_cursors[k].y = top;
-            this -> plane_cursors[k].x = left;
-            this -> plane_indices[k].y = (this -> plane_cursors[k].y ) * y_move_speed / (TILE_SIZE * 100);
-            this -> plane_indices[k].x = (this -> plane_cursors[k].x ) * x_move_speed / (TILE_SIZE * 100);
+            this -> plane_cursors[k].y = center.y * y_move_speed / 100;
+            this -> plane_cursors[k].x = center.x * x_move_speed / 100;
         }
-        this -> plane_cursors[k].y += (top - prev_top) * y_move_speed/ 100;
-        this -> plane_cursors[k].x += (left - prev_left) * x_move_speed/ 100;
-        i_start = (this -> plane_cursors[k].y ) * y_move_speed / (TILE_SIZE * 100);
-        j_start = (this -> plane_cursors[k].x ) * x_move_speed / (TILE_SIZE * 100);
-        int x_start = (j_start * 100 * TILE_SIZE) / x_move_speed - plane_cursors[k].x + left;
-        int y_start = (i_start * 100 * TILE_SIZE) / y_move_speed - plane_cursors[k].y + top;
+        this -> plane_cursors[k].y += (center.y - prev_center.y) * y_move_speed/ 100;
+        this -> plane_cursors[k].x += (center.x - prev_center.x) * x_move_speed/ 100;
+        int y_start = this->plane_cursors[k].y-this->height/2;
+        int x_start = this->plane_cursors[k].x-this->width/2;
+        i_start = y_start / TILE_SIZE;
+        j_start = x_start / TILE_SIZE;
+        y_start = center.y + i_start * TILE_SIZE - this->plane_cursors[k].y;
+        x_start = center.x + j_start * TILE_SIZE - this->plane_cursors[k].x;
 
         //cout << k << " " << j_start << " " << prev_j << " " << x_start << " " << endl;
         int i, j;
-        for (i = i_start, c_draw_pos.y = y_start + TILE_SIZE/2; c_draw_pos.y < this -> height + y_start + TILE_SIZE / 2; i++, c_draw_pos.y += TILE_SIZE) {
-            for (j = j_start, c_draw_pos.x = x_start + TILE_SIZE/2; c_draw_pos.x < this -> width + x_start + TILE_SIZE / 2; j++, c_draw_pos.x += TILE_SIZE) {
-                int tileID = tiles [i % num_h_tiles][j % num_w_tiles];
-                //cout <<  k << " " << x_move_speed  << " " << j << " " << tileID << endl;
+        for (i = i_start, c_draw_pos.y = y_start + TILE_SIZE/2; c_draw_pos.y < this -> height + y_start + TILE_SIZE; i++, c_draw_pos.y += TILE_SIZE) {
+            for (j = j_start, c_draw_pos.x = x_start + TILE_SIZE/2; c_draw_pos.x < this -> width + x_start + TILE_SIZE; j++, c_draw_pos.x += TILE_SIZE) {
+                int tileID = tiles [true_mod(i, num_h_tiles)][true_mod(j, num_w_tiles)];
                 // TILE IDS 0 and -1 are invalid, find out why!
                 if (tileID > 0) {
                     string tile = p_curr -> folder_prefix + convert_to_three_digits (tileID);
@@ -308,8 +306,7 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
             }
         }
     }
-    prev_top = top;
-    prev_left = left;
+    prev_center = center;
 
     // Render Dynamic Tiles
     sort (visible_tiles -> begin (), visible_tiles -> end (), z_compare);
@@ -357,7 +354,6 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
             flag = false;
         }
 
-        coords top_left (left, top);
         coords* c_tile_pos = d_tile -> get_coords ();
         bounding_box* box = this -> copy_tile_to_display (tile, c_tile_pos, &top_left, d_tile -> mirrored);
         d_tile -> set_bounding_box (box);

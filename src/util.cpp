@@ -119,3 +119,7 @@ coords::coords (int a, int b) {
     this -> x = a;
     this -> y = b;
 }
+
+int true_mod (int n, int M) {
+    return ((n % M) + M) % M;
+}

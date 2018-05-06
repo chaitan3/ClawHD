@@ -25,7 +25,6 @@ class display {
     int height;
     int width;
     coords* plane_cursors;
-    coords* plane_indices;
     coords cursor;
     map <string, texture*> textures;
     level* l1;
