@@ -37,6 +37,10 @@ animation::animation (const string& anim_file) {
         else
             cursor += 20;
     }
+    cout << anim_file << " ";
+    for (auto i: this->frames)
+          cout << i << ' ';
+    cout << endl;
     
     f_ani.close ();
 }
@@ -74,19 +78,30 @@ animation* memory_manager::get_animation (const string& anim) {
 }
 
 string memory_manager::get_default_image (const string& image) {
-    if (this -> animation_image_list.count (image) == 0)
+    if (this -> animation_image_list.count (image) == 0) {
+        //this -> load_image_list(image);
+        //return this -> get_default_image(image);
         return image;
+    }
     else
-        return this -> animation_image_list [image] -> at (0);
+        return this -> animation_image_list [image] -> begin()->second;
 }
 
 
 void memory_manager::load_image_list (const string& image) {
-    if (this -> animation_image_list.count (image) == 0)
-        this -> animation_image_list [image] = get_directory_list (image);
+    if (this -> animation_image_list.count (image) == 0) {
+        vector<string>* dir_list = get_directory_list (image);
+        this -> animation_image_list[image] = new map<string, string>;
+        for (const string& path: *dir_list) {
+            int index = path.rfind('_');
+            string key = path.substr(index + 1);
+            cout << key << " " << path << endl;
+            (*this -> animation_image_list [image])[key] = path;
+        }
+        delete dir_list;
+    }
 }
 
 string memory_manager::get_image_from_list (const string& image, int frame) {
-    int num_images = this -> animation_image_list[image] -> size ();
-    return this -> animation_image_list [image] -> at (frame % num_images);
+    return this -> animation_image_list [image] -> at ("FRAME" + convert_to_three_digits(frame));
 }

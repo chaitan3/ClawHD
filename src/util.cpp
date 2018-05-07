@@ -77,6 +77,7 @@ vector <string>* get_directory_list (const string& dir) {
         while ((file_dir = readdir (ptr_dir)) != nullptr) {
             if (file_dir -> d_name [0] != '.') {
                 int len = strlen (file_dir -> d_name);
+                if (len < 4 || file_dir -> d_name[len-4] != '.') continue;
                 file_dir -> d_name [len - 4] = '\0'; 
                 list_dir -> push_back (dir + string ("_") + string (file_dir -> d_name));
             }

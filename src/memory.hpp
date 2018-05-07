@@ -8,7 +8,7 @@
 
 class memory_manager {
     kdtree <dynamic_tile*> d_tiles;
-    map <string, vector <string>*> animation_image_list;
+    map <string, map <string, string>*> animation_image_list;
     map <string, animation*> animations;
     map <string, Mix_Chunk*> waves;    
     

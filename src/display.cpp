@@ -339,17 +339,15 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
                     continue;
                 }
                 else {
-                    // CLAW IMAGES HACK
-                    if (image == "CLAW_IMAGES") {
-                        tile = image + string ("_FRAME") +  convert_to_three_digits (frame);
-                    } else {
-                        tile = mm -> get_image_from_list(image, frame);
-                    }
+                    tile = mm -> get_image_from_list(image, frame);
                 }
-                
+                //if (image == "CLAW_IMAGES")
+                //cout << "here " << frame << endl;
             }
             else {
                 tile = mm -> get_default_image (image);
+                //if (image == "CLAW_IMAGES")
+                //cout << "here2 " << endl;
             }
             flag = false;
         }
