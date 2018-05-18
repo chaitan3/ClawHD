@@ -18,6 +18,13 @@ typedef struct {
     int bottom = 0;
 } action_tile;
 
+enum posture {
+    STANDING,
+    WALKING,
+    FALLING,
+    JUMPING,
+    CROUCHING
+};
 
 class dynamic_tile {
     string name;
@@ -29,8 +36,9 @@ class dynamic_tile {
     action_tile* attributes;
     bounding_box* box;
 
-    string prev_anim;
     animation_state anim_state;
+    posture pos;
+    static map<posture, string> default_anim;
     
     public:
     bool mirrored;
@@ -50,12 +58,13 @@ class dynamic_tile {
     string get_image ();
     string get_name ();
     string get_anim ();
-    string get_prev_anim ();
+    string get_default_anim ();
     void set_anim (const string&);
-    void reset_anim (const string&);
+    void reset_anim ();
     dynamic_tile () {};
 };
 
 bool z_compare (dynamic_tile*, dynamic_tile*);    
+
 
 #endif

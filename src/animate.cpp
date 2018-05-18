@@ -95,7 +95,7 @@ void memory_manager::load_image_list (const string& image) {
         for (const string& path: *dir_list) {
             int index = path.rfind('_');
             string key = path.substr(index + 1);
-            cout << key << " " << path << endl;
+            //cout << key << " " << path << endl;
             (*this -> animation_image_list [image])[key] = path;
         }
         delete dir_list;

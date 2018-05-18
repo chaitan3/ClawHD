@@ -3,7 +3,7 @@
 
 
 void fillPixel(SDL_Surface* buf, int x, int y, const Color& c) {
-    int32_t* offset = (int32_t*)(buf->pixels + y*buf->pitch + x*4);
+    int32_t* offset = (int32_t*)((char *)buf->pixels + y*buf->pitch + x*4);
     *offset = c.r + (c.g << 8) + (c.b << 16) + (c.a << 24);
 }
 
@@ -18,8 +18,8 @@ SDL_Surface* display::PID_Load(const string& file) {
     }
 
     int fsize = data.tellg();
-    data.seekg( 0, ios::end );
-    int len = data.tellg() - fsize;
+    data.seekg(0, ios::end);
+    int len = (int)data.tellg() - fsize;
     data.seekg(0, ios::beg);
     
     // Flags
@@ -331,11 +331,12 @@ vector <dynamic_tile*>* display::render_screen (memory_manager* mm, level* l_cur
         while (flag) {
             string anim = d_tile -> get_anim ();
             animation* a_curr = mm -> get_animation (anim);
-            //cout << "display " << d_tile -> get_name () << " " << image << " " << anim << endl;
             if (a_curr != nullptr) {
                 int frame = a_curr -> get_next_frame (d_tile -> get_animation_state ());
+                cout << d_tile->get_name() << " " << frame << endl;
                 if (frame == -1) {
-                    d_tile -> reset_anim (d_tile -> get_prev_anim());
+                    d_tile -> reset_anim ();
+                    cout << "reset " << d_tile->get_anim() << " " << frame << endl;
                     continue;
                 }
                 else {
