@@ -68,44 +68,35 @@ int main (int argc, char **argv)
                 d_claw -> set_anim("CLAW_ANIS_PISTOL");
                 mm.sound_play_file ("CLAW_SOUNDS_GUNSHOT");
             } else if (key_state [SDL_SCANCODE_RIGHT]) {
+                mm.remove_dynamic_tile(d_claw);
+                state -> x += scroll_speed;
+                mm.insert_dynamic_tile(d_claw);
                 d_claw -> mirrored = false;
                 d_claw -> set_anim ("CLAW_ANIS_WALK");
             } else if (key_state [SDL_SCANCODE_LEFT]) {
+                mm.remove_dynamic_tile(d_claw);
+                state -> x += scroll_speed;
+                mm.insert_dynamic_tile(d_claw);
                 d_claw -> mirrored = true;
                 d_claw -> set_anim ("CLAW_ANIS_WALK");
             } else if (key_state [SDL_SCANCODE_SPACE]) {
+                mm.remove_dynamic_tile(d_claw);
+                animation_state *jump = d_claw -> get_animation_state();
+                if (jump -> frame > 7)
+                    state -> y += jump_speed;
+                else
+                    state -> y -= jump_speed;
+                if ((key_state [SDL_SCANCODE_RIGHT]) && !(d_claw -> mirrored)) {
+                    state -> x += scroll_speed;
+                }
+                else if (key_state [SDL_SCANCODE_LEFT] && (d_claw -> mirrored)) {
+                    state -> x -= scroll_speed;
+                }
+                mm.insert_dynamic_tile(d_claw);
                 d_claw -> set_anim ("CLAW_ANIS_JUMP");
+
             }
         }
-        //else if (anim == "CLAW_ANIS_WALK") {
-        //    if ((key_state [SDL_SCANCODE_RIGHT]) && !(d_claw -> mirrored)) {
-        //        mm.remove_dynamic_tile(d_claw);
-        //        state -> x += scroll_speed;
-        //        mm.insert_dynamic_tile(d_claw);
-        //    }
-        //    else if (key_state [SDL_SCANCODE_LEFT] && (d_claw -> mirrored)) {
-        //        mm.remove_dynamic_tile(d_claw);
-        //        state -> x -= scroll_speed;
-        //        mm.insert_dynamic_tile(d_claw);
-        //    }
-        //    else
-        //        d_claw -> set_anim ("CLAW_ANIS_STAND");
-        //}
-        //else if (anim == "CLAW_ANIS_JUMP") {
-        //    mm.remove_dynamic_tile(d_claw);
-        //    animation_state *jump = d_claw -> get_animation_state();
-        //    if (jump -> frame > 7)
-        //        state -> y += jump_speed;
-        //    else
-        //        state -> y -= jump_speed;
-        //    if ((key_state [SDL_SCANCODE_RIGHT]) && !(d_claw -> mirrored)) {
-        //        state -> x += scroll_speed;
-        //    }
-        //    else if (key_state [SDL_SCANCODE_LEFT] && (d_claw -> mirrored)) {
-        //        state -> x -= scroll_speed;
-        //    }
-        //    mm.insert_dynamic_tile(d_claw);
-        //}
 
         vector <dynamic_tile*>* interior_tiles = disp.render_screen (&mm, &l_curr, state);
         collision_detection (&mm, d_claw, interior_tiles);
